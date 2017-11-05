@@ -16,12 +16,11 @@ Including another URLconf
 from django.conf.urls import url,include
 
 from rest_framework.documentation import include_docs_urls
-
+from ims_fa.views import ObtainExpireAuthToken
 from ims_fa.urls import router
-from authadmin.views import obtain_expiring_auth_token
 
 urlpatterns = [
-    url(r'^api-token-auth/',obtain_expiring_auth_token),
+    url(r'^api-token-auth/',ObtainExpireAuthToken.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api/',include(router.urls)),
     url(r'^docs/',include_docs_urls(title='BaoMa API'))

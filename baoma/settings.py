@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-
+import datetime
 import os
 import sys
 
@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'ims_fa',
-    'authadmin',
 
 ]
 
@@ -100,7 +99,10 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
+JWT_AUTH = {
+    'JWT_PRIVATE_KEY':'RS256',
+    'JWT_EXPIRATION_DELTA':datetime.timedelta(seconds=30)
+}
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
@@ -119,6 +121,8 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 
+REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES=1
+
 REST_FRAMEWORK = {
 
     'DEFAULT_PERMISSION_CLASSES': (
@@ -126,8 +130,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-    ),
+        'ims_fa.authentication.ExpiringTokenAuthentication'
+    )
 }
 
-REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES = 1
+
