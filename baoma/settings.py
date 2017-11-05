@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'ims_fa',
+    'authadmin',
 
 ]
 
@@ -129,3 +130,4 @@ REST_FRAMEWORK = {
     ),
 }
 
+REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES = 1
