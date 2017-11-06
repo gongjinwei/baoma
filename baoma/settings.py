@@ -38,12 +38,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'ims_fa',
+    'corsheaders',
 
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -99,10 +101,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-JWT_AUTH = {
-    'JWT_PRIVATE_KEY':'RS256',
-    'JWT_EXPIRATION_DELTA':datetime.timedelta(seconds=30)
-}
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
@@ -121,12 +120,13 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 
-REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES=1
+REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES=10
 
 REST_FRAMEWORK = {
 
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.AllowAny',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
@@ -134,4 +134,4 @@ REST_FRAMEWORK = {
     )
 }
 
-
+CORS_ORIGIN_ALLOW_ALL = True

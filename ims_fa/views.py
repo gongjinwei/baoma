@@ -11,8 +11,6 @@ from rest_framework.response import Response
 from . import models
 from . import serializers
 
-EXPIRE_MINUTES=getattr(settings,'REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES',1)
-
 
 class ObtainExpireAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
@@ -22,7 +20,7 @@ class ObtainExpireAuthToken(ObtainAuthToken):
             user = serializer.validated_data['user']
             token, created = Token.objects.get_or_create(user=user)
             time_now = datetime.datetime.now()
-
+            EXPIRE_MINUTES = getattr(settings, 'REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES', 1)
             if created or token.created < time_now - datetime.timedelta(minutes=EXPIRE_MINUTES):
                 token.delete()
                 token = Token.objects.create(user=user)
