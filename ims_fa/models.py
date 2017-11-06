@@ -492,6 +492,7 @@ class Tasks(models.Model):
     task_id = models.AutoField(primary_key=True)
     store_id = models.ForeignKey('Stores',db_column='store_id',related_name='tasks')
     task_type = models.IntegerField()
+    task_name = models.CharField(max_length=50)
     task_platform = models.IntegerField()
     goods_title = models.CharField(max_length=80)
     goods_url = models.CharField(max_length=255)

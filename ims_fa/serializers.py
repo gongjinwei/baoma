@@ -17,7 +17,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class PublishSerializer(serializers.ModelSerializer):
-    orders = OrderSerializer(many=True)
+    orders = OrderSerializer(many=True,read_only=True)
 
     class Meta:
         model = models.Publish
@@ -25,7 +25,7 @@ class PublishSerializer(serializers.ModelSerializer):
 
 
 class TasksSerializer(serializers.ModelSerializer):
-    publishes = PublishSerializer(many=True)
+    publishes = PublishSerializer(many=True,read_only=True)
 
     class Meta:
         model = models.Tasks
@@ -33,7 +33,7 @@ class TasksSerializer(serializers.ModelSerializer):
 
 
 class StoresSerializer(serializers.ModelSerializer):
-    tasks = TasksSerializer(many=True)
+    tasks = TasksSerializer(many=True,read_only=True)
 
     class Meta:
         model = models.Stores
@@ -47,8 +47,8 @@ class SaddressSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class MerchantsSerializer(serializers.ModelSerializer):
-    stores = StoresSerializer(many=True)
-    addresses = SaddressSerializer(many=True)
+    stores = StoresSerializer(many=True,read_only=True)
+    addresses = SaddressSerializer(many=True,read_only=True)
 
     class Meta:
         model = models.Merchants
@@ -62,7 +62,7 @@ class PageSerializer(serializers.ModelSerializer):
 
 
 class MembersSerializer(serializers.ModelSerializer):
-    orders = OrderSerializer(many=True)
+    orders = OrderSerializer(many=True,read_only=True)
 
     class Meta:
         model = models.Members
