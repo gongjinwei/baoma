@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Admin(models.Model):
     username = models.CharField(max_length=20)
     nickname = models.CharField(max_length=50)
@@ -36,7 +37,7 @@ class AdminLog(models.Model):
 
 class AmountRecords(models.Model):
     record_id = models.AutoField(primary_key=True)
-    member_id = models.ForeignKey('Members',db_column='member_id')
+    member_id = models.ForeignKey('Members', db_column='member_id')
     member_name = models.CharField(max_length=45)
     av_amount = models.DecimalField(max_digits=8, decimal_places=2)
     freeze_amount = models.DecimalField(max_digits=8, decimal_places=2)
@@ -358,6 +359,7 @@ class Merchants(models.Model):
     def __str__(self):
         return self.realname
 
+
 class Models(models.Model):
     model_id = models.AutoField(primary_key=True)
     member_id = models.ForeignKey('Members', db_column='member_id')
@@ -383,8 +385,8 @@ class Models(models.Model):
 
 class Order(models.Model):
     order_id = models.AutoField(primary_key=True)
-    member_id = models.ForeignKey('Members', db_column='member_id',related_name='orders')
-    publish_id = models.ForeignKey('Publish',db_column='publish_id',related_name='orders')
+    member_id = models.ForeignKey('Members', db_column='member_id', related_name='orders')
+    publish_id = models.ForeignKey('Publish', db_column='publish_id', related_name='orders')
     order_sn = models.CharField(max_length=20)
     order_type = models.IntegerField()
     platform_ordersn = models.CharField(max_length=20)
@@ -444,7 +446,7 @@ class Page(models.Model):
 
 class Publish(models.Model):
     publish_id = models.AutoField(primary_key=True)
-    task_id = models.ForeignKey('Tasks',db_column='task_id',related_name='publishes')
+    task_id = models.ForeignKey('Tasks', db_column='task_id', related_name='publishes')
     pub_start = models.IntegerField()
     pub_end = models.IntegerField()
     pub_quantity = models.SmallIntegerField()
@@ -459,7 +461,7 @@ class Publish(models.Model):
 
 class Saddress(models.Model):
     address_id = models.AutoField(primary_key=True)
-    merchant_id = models.ForeignKey('Merchants',db_column='merchant_id',related_name='addresses')
+    merchant_id = models.ForeignKey('Merchants', db_column='merchant_id', related_name='addresses')
     consignee = models.CharField(max_length=20)
     phone = models.CharField(max_length=12)
     province = models.CharField(max_length=20)
@@ -475,7 +477,7 @@ class Saddress(models.Model):
 
 class Stores(models.Model):
     store_id = models.AutoField(primary_key=True)
-    merchant_id = models.ForeignKey('Merchants',db_column='merchant_id',related_name='stores')
+    merchant_id = models.ForeignKey('Merchants', db_column='merchant_id', related_name='stores')
     store_platform = models.IntegerField()
     store_name = models.CharField(max_length=45)
     store_url = models.CharField(max_length=45)
@@ -489,9 +491,9 @@ class Stores(models.Model):
 
 class Tasks(models.Model):
     task_id = models.AutoField(primary_key=True)
-    store_id = models.ForeignKey('Stores',db_column='store_id',related_name='tasks')
+    store_id = models.ForeignKey('Stores', db_column='store_id', related_name='tasks')
     task_type = models.IntegerField()
-    task_name = models.CharField(max_length=50,verbose_name='任务名称')
+    task_name = models.CharField(max_length=50, verbose_name='任务名称')
     task_platform = models.IntegerField(verbose_name='任务平台')
     goods_title = models.CharField(max_length=80)
     goods_url = models.CharField(max_length=255)
@@ -548,4 +550,3 @@ class Tasks(models.Model):
     class Meta:
         managed = False
         db_table = 'ims_fa_tasks'
-
