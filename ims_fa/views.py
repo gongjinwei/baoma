@@ -3,7 +3,8 @@ from django.shortcuts import render
 # Create your views here.
 import datetime
 from django.conf import settings
-from rest_framework import viewsets,status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets,status,filters
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -38,6 +39,10 @@ class AdminViewSet(viewsets.ModelViewSet):
 class TasksViewSet(viewsets.ModelViewSet):
     queryset = models.Tasks.objects.all()
     serializer_class = serializers.TasksSerializer
+    filter_backends = [DjangoFilterBackend,filters.SearchFilter,filters.OrderingFilter]
+    filter_fields =['task_platform','task_name']
+    search_fields =['task_name','goods_title']
+    ordering_fields=['task_platform']
 
 
 class StoresViewSet(viewsets.ModelViewSet):
