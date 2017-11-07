@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 
 class Admin(models.Model):
     username = models.CharField(max_length=20)
@@ -550,3 +550,11 @@ class Tasks(models.Model):
     class Meta:
         managed = False
         db_table = 'ims_fa_tasks'
+
+
+class ForTest(models.Model):
+    name=models.CharField(max_length=50,null=True)
+    address=models.CharField(max_length=100,null=True)
+
+    class Meta:
+        verbose_name='测试'

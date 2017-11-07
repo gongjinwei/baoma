@@ -14,4 +14,6 @@ router.register(r'order',views.OrderViewSet)
 router.register(r'models',views.ModelsViewSet)
 router.register(r'merchants',views.MerchantsViewSet)
 router.register(r'members',views.MembersViewSet)
+router.register(r'area',views.AreaViewSet)
+router.register(r'fortest',views.ForTestViewSet)
 

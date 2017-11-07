@@ -84,3 +84,13 @@ class MembersViewSet(viewsets.ModelViewSet):
     queryset = models.Members.objects.all()
     serializer_class = serializers.MembersSerializer
 
+
+class AreaViewSet(viewsets.ModelViewSet):
+    queryset = models.Area.objects.all()
+    serializer_class = serializers.AreaSerializer
+
+
+class ForTestViewSet(viewsets.ModelViewSet):
+    queryset = models.ForTest.objects.all()
+    serializer_class = serializers.ForTestSerializer
+

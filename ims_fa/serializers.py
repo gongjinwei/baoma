@@ -75,3 +75,15 @@ class ModelsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Models
         fields = '__all__'
+
+class AreaSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Area
+        fields = '__all__'
+
+class ForTestSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ForTest
+        fields = '__all__'
