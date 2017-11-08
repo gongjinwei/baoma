@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Admin(models.Model):
     username = models.CharField(max_length=20)
     nickname = models.CharField(max_length=50)
@@ -553,8 +554,5 @@ class Tasks(models.Model):
 
 
 class ForTest(models.Model):
-    name=models.CharField(max_length=50,null=True)
-    address=models.CharField(max_length=100,null=True)
-
-    class Meta:
-        verbose_name='测试'
+    name=models.CharField(max_length=50)
+    image = models.ImageField(upload_to='baoma/%Y%m',max_length=255,null=True)
