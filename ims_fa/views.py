@@ -4,7 +4,7 @@ from django.shortcuts import render
 import datetime
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets,status,filters
+from rest_framework import viewsets,status,filters,generics
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response

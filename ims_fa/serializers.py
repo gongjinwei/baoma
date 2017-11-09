@@ -10,14 +10,13 @@ class AdminSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.Order
         fields = '__all__'
 
 
 class PublishSerializer(serializers.ModelSerializer):
-    orders = OrderSerializer(many=True,read_only=True)
+    orders = OrderSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Publish
@@ -25,7 +24,7 @@ class PublishSerializer(serializers.ModelSerializer):
 
 
 class TasksSerializer(serializers.ModelSerializer):
-    publishes = PublishSerializer(many=True,read_only=True)
+    publishes = PublishSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Tasks
@@ -33,7 +32,7 @@ class TasksSerializer(serializers.ModelSerializer):
 
 
 class StoresSerializer(serializers.ModelSerializer):
-    tasks = TasksSerializer(many=True,read_only=True)
+    tasks = TasksSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Stores
@@ -44,6 +43,7 @@ class SaddressSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = models.Saddress
         fields = '__all__'
+        depth=1
 
 
 class MerchantsSerializer(serializers.ModelSerializer):
@@ -60,9 +60,8 @@ class PageSerializer(serializers.ModelSerializer):
         model = models.Page
         fields = '__all__'
 
-
 class MembersSerializer(serializers.ModelSerializer):
-    orders = OrderSerializer(many=True,read_only=True)
+    orders = OrderSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Members
@@ -76,14 +75,14 @@ class ModelsSerializer(serializers.ModelSerializer):
         model = models.Models
         fields = '__all__'
 
-class AreaSerializer(serializers.ModelSerializer):
 
+class AreaSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Area
         fields = '__all__'
 
-class ForTestSerializer(serializers.ModelSerializer):
 
+class ForTestSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ForTest
         fields = '__all__'

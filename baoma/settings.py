@@ -48,7 +48,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -65,7 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.template.context_processors.media',
+                # 'django.template.context_processors.media',
             ],
         },
     },
@@ -134,8 +134,8 @@ REST_FRAMEWORK = {
         # 'rest_framework.permissions.AllowAny',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-        # 'ims_fa.utils.CsrfExemptSessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        'ims_fa.utils.CsrfExemptSessionAuthentication',
         'ims_fa.authentication.ExpiringTokenAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS':(
