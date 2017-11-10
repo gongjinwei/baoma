@@ -8,6 +8,7 @@ from rest_framework import viewsets,status,filters,generics
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+import copy
 
 from . import models
 from . import serializers
@@ -43,6 +44,18 @@ class TasksViewSet(viewsets.ModelViewSet):
     filter_fields =['task_platform','task_name']
     search_fields =['task_name','goods_title']
     ordering_fields=['task_platform']
+
+    def create(self, request, *args, **kwargs):
+        task_serializer = self.get_serializer(data=request.data)
+        task_serializer.is_valid(raise_exception=True)
+        self.perform_create(task_serializer)
+        altered_data = copy.deepcopy(request.data)
+        altered_data.update({'task_id': task_serializer.instance.pk})
+        publish_serializer = serializers.PublishSerializer(data=altered_data)
+        publish_serializer.is_valid(raise_exception=True)
+        self.perform_create(publish_serializer)
+        headers = self.get_success_headers(task_serializer.data)
+        return Response(task_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class StoresViewSet(viewsets.ModelViewSet):
@@ -90,7 +103,6 @@ class AreaViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.AreaSerializer
 
 
-class ForTestViewSet(viewsets.ModelViewSet):
-    queryset = models.ForTest.objects.all()
-    serializer_class = serializers.ForTestSerializer
-
+class ImageUpViewSet(viewsets.ModelViewSet):
+    queryset = models.ImageUp.objects.all()
+    serializer_class = serializers.ImageUpSerializer

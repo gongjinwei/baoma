@@ -3,6 +3,7 @@ import datetime
 from django.conf import settings
 from rest_framework import exceptions
 from rest_framework.authentication import TokenAuthentication
+from rest_framework import permissions
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -32,3 +33,8 @@ class ExpiringTokenAuthentication(TokenAuthentication):
         if token:
             cache.set(key, token.user, EXPIRE_MINUTES * 60)
         return (token.user, token)
+
+
+class IsOwnerOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.owner == request.user

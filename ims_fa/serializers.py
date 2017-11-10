@@ -2,7 +2,6 @@
 from rest_framework import serializers
 from . import models
 
-
 class AdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Admin
@@ -47,7 +46,7 @@ class SaddressSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class MerchantsSerializer(serializers.ModelSerializer):
-    stores = StoresSerializer(many=True,read_only=True)
+    stores = serializers.StringRelatedField(many=True,read_only=True)
     addresses = SaddressSerializer(many=True,read_only=True)
 
     class Meta:
@@ -59,6 +58,7 @@ class PageSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Page
         fields = '__all__'
+
 
 class MembersSerializer(serializers.ModelSerializer):
     orders = OrderSerializer(many=True, read_only=True)
@@ -82,7 +82,11 @@ class AreaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ForTestSerializer(serializers.ModelSerializer):
+class ImageUpSerializer(serializers.ModelSerializer):
+
     class Meta:
-        model = models.ForTest
+        model = models.ImageUp
         fields = '__all__'
+
+
+

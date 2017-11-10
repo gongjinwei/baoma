@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url,include
 
+from django.contrib import admin
 from rest_framework.documentation import include_docs_urls
 from ims_fa.views import ObtainExpireAuthToken
 from ims_fa.urls import router
@@ -22,6 +23,7 @@ from django.views.static import serve
 from .settings import MEDIA_ROOT ,STATIC_ROOT
 
 urlpatterns = [
+    url(r'^admin/',admin.site.urls),
     url(r'^api-token-auth/',ObtainExpireAuthToken.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api/',include(router.urls)),
