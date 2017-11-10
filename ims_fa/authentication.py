@@ -36,5 +36,9 @@ class ExpiringTokenAuthentication(TokenAuthentication):
 
 
 class IsOwnerOnly(permissions.BasePermission):
+    authenticated_users_only = True
+
+
     def has_object_permission(self, request, view, obj):
-        return obj.owner == request.user
+
+        return request.user and (request.user.is_authenticated() or not self.authenticated_users_only) and obj.owner==request.user

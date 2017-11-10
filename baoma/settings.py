@@ -127,13 +127,13 @@ MEDIA_URL = '/media/'
 STATIC_ROOT =os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES=10
+REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES=60
 
 REST_FRAMEWORK = {
 
     'DEFAULT_PERMISSION_CLASSES': (
-        # 'rest_framework.permissions.IsAuthenticated',
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.AllowAny',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'rest_framework.authentication.SessionAuthentication',

@@ -4,14 +4,14 @@ from django.shortcuts import render
 import datetime
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets,status,filters,generics
+from rest_framework import viewsets,status,filters,permissions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-import copy
 
 from . import models
 from . import serializers
+from .authentication import IsOwnerOnly
 
 
 class ObtainExpireAuthToken(ObtainAuthToken):
@@ -47,15 +47,26 @@ class TasksViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         task_serializer = self.get_serializer(data=request.data)
+
         task_serializer.is_valid(raise_exception=True)
         self.perform_create(task_serializer)
-        altered_data = copy.deepcopy(request.data)
-        altered_data.update({'task_id': task_serializer.instance.pk})
-        publish_serializer = serializers.PublishSerializer(data=altered_data)
-        publish_serializer.is_valid(raise_exception=True)
-        self.perform_create(publish_serializer)
+
+        pub_date = request.data.get('pubs_start', '')
+        time_array = request.data.get('time_array', [])
+        if time_array and pub_date:
+            pub_date = datetime.datetime.strptime(pub_date, '%Y-%m-%d')
+            for index, at in enumerate(time_array):
+                if at:
+                    publish_serializer = serializers.PublishSerializer(data=request.data)
+                    publish_serializer.is_valid(raise_exception=True)
+                    pub_start = pub_date + datetime.timedelta(hours=index)
+                    pub_start = pub_start.timestamp()
+                    publish_serializer.save(task_id=task_serializer.instance,owner=request.user,pub_start=pub_start,pub_quantity=at)
         headers = self.get_success_headers(task_serializer.data)
         return Response(task_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class StoresViewSet(viewsets.ModelViewSet):
@@ -71,6 +82,9 @@ class SaddressViewSet(viewsets.ModelViewSet):
 class PublishViewSet(viewsets.ModelViewSet):
     queryset = models.Publish.objects.all()
     serializer_class = serializers.PublishSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class PageViewSet(viewsets.ModelViewSet):

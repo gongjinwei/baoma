@@ -16,6 +16,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class PublishSerializer(serializers.ModelSerializer):
     orders = OrderSerializer(many=True, read_only=True)
+    owner = serializers.ReadOnlyField(source='owner.username')
+    task_id = serializers.ReadOnlyField(source='task_id.task_name')
 
     class Meta:
         model = models.Publish
@@ -24,10 +26,12 @@ class PublishSerializer(serializers.ModelSerializer):
 
 class TasksSerializer(serializers.ModelSerializer):
     publishes = PublishSerializer(many=True, read_only=True)
+    owner =serializers.ReadOnlyField(source='owner.username')
 
     class Meta:
         model = models.Tasks
         fields = '__all__'
+        read_only_fields = ('owner',)
 
 
 class StoresSerializer(serializers.ModelSerializer):
