@@ -1,8 +1,8 @@
 # -*- coding:UTF-8 -*-
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.fields.related import ReverseOneToOneDescriptor
 from rest_framework.permissions import BasePermission
+from rest_framework.filters import BaseFilterBackend
 
 
 def create_permission(sender, instance, created=False, *args, **kwargs):
@@ -37,7 +37,7 @@ def create_permission(sender, instance, created=False, *args, **kwargs):
             Permission.objects.filter(codename=codename, content_type=content_type)
 
 
-class TaskPermissionFilterBackend(object):
+class TaskPermissionFilterBackend(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         """

@@ -5,7 +5,7 @@ import datetime
 from django.conf import settings
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets,status,filters
+from rest_framework import viewsets,status,filters,views
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -72,6 +72,19 @@ class TasksViewSet(viewsets.ModelViewSet):
         serializer.save(owner=self.request.user)
 
 
+class TaskOrderView(views.APIView):
+    """
+    输入task_id调出所有相关的订单列表
+    """
+    def get(self,request,pk,format=None):
+        """
+        :param pk: for task_id
+        """
+        queryset=models.Order.objects.filter(publish_id__task_id=pk)
+        serializer = serializers.OrderSerializer(queryset,many=True)
+        return Response(serializer.data)
+
+
 class StoresViewSet(viewsets.ModelViewSet):
     queryset = models.Stores.objects.all()
     serializer_class = serializers.StoresSerializer
@@ -102,6 +115,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     ordering_fields=['goods_title']
     ordering=('-order_id',)
 
+
 class ModelsViewSet(viewsets.ModelViewSet):
     queryset = models.Models.objects.all()
     serializer_class = serializers.ModelsSerializer
@@ -125,3 +139,34 @@ class AreaViewSet(viewsets.ModelViewSet):
 class ImageUpViewSet(viewsets.ModelViewSet):
     queryset = models.ImageUp.objects.all()
     serializer_class = serializers.ImageUpSerializer
+
+
+class FeedbackViewSet(viewsets.ModelViewSet):
+    queryset = models.Feedback.objects.all()
+    serializer_class = serializers.FeedbackSerializer
+
+
+class ImagesViewSet(viewsets.ModelViewSet):
+    queryset = models.Images.objects.all()
+    serializer_class = serializers.ImagesSerializer
+
+
+class ImagesShowViewSet(viewsets.ModelViewSet):
+    queryset = models.ImagesShow.objects.all()
+    serializer_class = serializers.ImagesShowSerializer
+
+
+class BlogCommentViewSet(viewsets.ModelViewSet):
+    queryset = models.BlogComment.objects.all()
+    serializer_class = serializers.BlogCommentSerializer
+
+
+class BlogPostViewSet(viewsets.ModelViewSet):
+    queryset = models.BlogPost.objects.all()
+    serializer_class = serializers.BlogPostSerializer
+
+
+class BlogCategoryViewSet(viewsets.ModelViewSet):
+    queryset = models.BlogCategory.objects.all()
+    serializer_class = serializers.BlogCategorySerializer
+

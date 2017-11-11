@@ -89,4 +89,46 @@ class ImageUpSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FeedbackSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Feedback
+        fields = '__all__'
+
+
+class ImagesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Images
+        fields = '__all__'
+
+
+class ImagesShowSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ImagesShow
+        fields = '__all__'
+
+
+class BlogCommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.BlogComment
+        fields = '__all__'
+
+
+class BlogPostSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.BlogPost
+        fields = '__all__'
+
+
+class BlogCategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.BlogCategory
+        fields = '__all__'
+
+
 
