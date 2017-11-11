@@ -2,6 +2,7 @@
 from rest_framework import serializers
 from . import models
 
+
 class AdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Admin
@@ -15,7 +16,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class PublishSerializer(serializers.ModelSerializer):
-    orders = OrderSerializer(many=True, read_only=True)
     owner = serializers.ReadOnlyField(source='owner.username')
     task_id = serializers.ReadOnlyField(source='task_id.task_name')
 
@@ -25,7 +25,6 @@ class PublishSerializer(serializers.ModelSerializer):
 
 
 class TasksSerializer(serializers.ModelSerializer):
-    publishes = PublishSerializer(many=True, read_only=True)
     owner =serializers.ReadOnlyField(source='owner.username')
 
     class Meta:
@@ -35,7 +34,6 @@ class TasksSerializer(serializers.ModelSerializer):
 
 
 class StoresSerializer(serializers.ModelSerializer):
-    tasks = TasksSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Stores
@@ -51,7 +49,6 @@ class SaddressSerializer(serializers.HyperlinkedModelSerializer):
 
 class MerchantsSerializer(serializers.ModelSerializer):
     stores = serializers.StringRelatedField(many=True,read_only=True)
-    addresses = SaddressSerializer(many=True,read_only=True)
 
     class Meta:
         model = models.Merchants
@@ -65,7 +62,6 @@ class PageSerializer(serializers.ModelSerializer):
 
 
 class MembersSerializer(serializers.ModelSerializer):
-    orders = OrderSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Members

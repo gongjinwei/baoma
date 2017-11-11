@@ -98,7 +98,9 @@ class PageViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = models.Order.objects.all()
     serializer_class = serializers.OrderSerializer
-
+    filter_backends=[filters.OrderingFilter]
+    ordering_fields=['goods_title']
+    ordering=('-order_id',)
 
 class ModelsViewSet(viewsets.ModelViewSet):
     queryset = models.Models.objects.all()
