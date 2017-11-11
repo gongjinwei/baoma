@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 class Admin(models.Model):
     username = models.CharField(max_length=20)
     nickname = models.CharField(max_length=50)
@@ -447,7 +446,7 @@ class Page(models.Model):
 
 class Publish(models.Model):
     publish_id = models.AutoField(primary_key=True)
-    task_id = models.ForeignKey('Tasks', db_column='task_id', related_name='publishes',null=True)
+    task_id = models.ForeignKey('Tasks', db_column='task_id', related_name='publishes', null=True)
     pub_start = models.IntegerField(null=True)
     pub_end = models.IntegerField(null=True)
     pub_quantity = models.SmallIntegerField(null=True)
@@ -496,26 +495,26 @@ class Stores(models.Model):
 
 class Tasks(models.Model):
     task_id = models.AutoField(primary_key=True)
-    store_id = models.ForeignKey('Stores', db_column='store_id', related_name='tasks',null=True)
+    store_id = models.ForeignKey('Stores', db_column='store_id', related_name='tasks', null=True)
     task_type = models.IntegerField(null=True)
-    task_name = models.CharField(max_length=50, verbose_name='任务名称',null=True)
-    task_platform = models.IntegerField(verbose_name='任务平台',null=True)
-    goods_title = models.CharField(max_length=80,null=True)
-    goods_url = models.CharField(max_length=255,null=True)
-    goods_image = models.CharField(max_length=255,null=True)
-    sku_image = models.CharField(max_length=255,null=True)
+    task_name = models.CharField(max_length=50, verbose_name='任务名称', null=True)
+    task_platform = models.IntegerField(verbose_name='任务平台', null=True)
+    goods_title = models.CharField(max_length=80, null=True)
+    goods_url = models.CharField(max_length=255, null=True)
+    goods_image = models.CharField(max_length=255, null=True)
+    sku_image = models.CharField(max_length=255, null=True)
     goods_body = models.TextField(null=True)
-    goods_price = models.DecimalField(max_digits=8, decimal_places=2,null=True)
+    goods_price = models.DecimalField(max_digits=8, decimal_places=2, null=True)
     goods_weight = models.FloatField(null=True)
-    goods_freight = models.DecimalField(max_digits=8, decimal_places=2,null=True)
-    task_commission = models.DecimalField(max_digits=8, decimal_places=2,null=True)
+    goods_freight = models.DecimalField(max_digits=8, decimal_places=2, null=True)
+    task_commission = models.DecimalField(max_digits=8, decimal_places=2, null=True)
     task_discount = models.FloatField(null=True)
-    keyword = models.CharField(max_length=45,null=True)
-    position = models.CharField(max_length=45,null=True)
-    search_image = models.CharField(max_length=255,null=True)
-    condition_image = models.CharField(max_length=255,null=True)
+    keyword = models.CharField(max_length=45, null=True)
+    position = models.CharField(max_length=45, null=True)
+    search_image = models.CharField(max_length=255, null=True)
+    condition_image = models.CharField(max_length=255, null=True)
     taotoken = models.TextField(null=True)
-    qrcode_image = models.CharField(max_length=255,null=True)
+    qrcode_image = models.CharField(max_length=255, null=True)
     staytime = models.IntegerField(null=True)
     add_favirate = models.IntegerField(null=True)
     add_cart = models.IntegerField(null=True)
@@ -529,17 +528,17 @@ class Tasks(models.Model):
     model_gender = models.IntegerField(null=True)
     model_age_min = models.IntegerField(null=True)
     model_age_max = models.IntegerField(null=True)
-    model_area = models.CharField(max_length=255,null=True)
+    model_area = models.CharField(max_length=255, null=True)
     model_height_min = models.IntegerField(null=True)
     model_height_max = models.IntegerField(null=True)
     model_weight_min = models.IntegerField(null=True)
     model_weight_max = models.IntegerField(null=True)
     model_shoe_min = models.IntegerField(null=True)
     model_shoe_max = models.IntegerField(null=True)
-    model_designated = models.CharField(max_length=255,null=True)
-    photograph_scene = models.CharField(max_length=45,null=True)
-    photograph_collocation = models.CharField(max_length=45,null=True)
-    photograph_images = models.CharField(max_length=255,null=True)
+    model_designated = models.CharField(max_length=255, null=True)
+    photograph_scene = models.CharField(max_length=45, null=True)
+    photograph_collocation = models.CharField(max_length=45, null=True)
+    photograph_images = models.CharField(max_length=255, null=True)
     photograph_attention = models.TextField(null=True)
     address_id = models.IntegerField(null=True)
     return_attention = models.TextField(null=True)
@@ -551,7 +550,7 @@ class Tasks(models.Model):
     height_filter = models.IntegerField(null=True)
     weight_filter = models.IntegerField(null=True)
     shoe_filter = models.IntegerField(null=True)
-    owner = models.ForeignKey(User,null=True)
+    owner = models.ForeignKey(User, null=True)
 
     class Meta:
         managed = False
@@ -559,4 +558,4 @@ class Tasks(models.Model):
 
 
 class ImageUp(models.Model):
-    image = models.ImageField(upload_to='baoma/%Y%m',max_length=255)
+    image = models.ImageField(upload_to='baoma/%Y%m', max_length=255)

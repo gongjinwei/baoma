@@ -3,15 +3,17 @@ from django.shortcuts import render
 # Create your views here.
 import datetime
 from django.conf import settings
+
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets,status,filters,permissions
+from rest_framework import viewsets,status,filters
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+from guardian.shortcuts import assign_perm
 
 from . import models
 from . import serializers
-from .authentication import IsOwnerOnly
+from .permission import TaskPermissionFilterBackend
 
 
 class ObtainExpireAuthToken(ObtainAuthToken):
@@ -40,7 +42,7 @@ class AdminViewSet(viewsets.ModelViewSet):
 class TasksViewSet(viewsets.ModelViewSet):
     queryset = models.Tasks.objects.all()
     serializer_class = serializers.TasksSerializer
-    filter_backends = [DjangoFilterBackend,filters.SearchFilter,filters.OrderingFilter]
+    filter_backends = [DjangoFilterBackend,filters.SearchFilter,filters.OrderingFilter,TaskPermissionFilterBackend]
     filter_fields =['task_platform','task_name']
     search_fields =['task_name','goods_title']
     ordering_fields=['task_platform']
@@ -51,6 +53,7 @@ class TasksViewSet(viewsets.ModelViewSet):
         task_serializer.is_valid(raise_exception=True)
         self.perform_create(task_serializer)
 
+        assign_perm('view_task',self.request.user,task_serializer.instance)
         pub_date = request.data.get('pubs_start', '')
         time_array = request.data.get('time_array', [])
         if time_array and pub_date:

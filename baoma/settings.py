@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django_filters',
     'ims_fa',
     'corsheaders',
+    'guardian',
 
 ]
 
@@ -146,4 +147,9 @@ REST_FRAMEWORK = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend', # this is default
+    'guardian.backends.ObjectPermissionBackend',
+)
 
