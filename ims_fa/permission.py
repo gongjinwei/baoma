@@ -83,7 +83,6 @@ class ModulePermission(BasePermission):
         # to the root view when using DefaultRouter.
         # is_superuser用户有上帝权限
 
-
         if hasattr(view, 'get_queryset'):
             queryset = view.get_queryset()
             queryset = queryset.filter(owner_id=request.user.id)
