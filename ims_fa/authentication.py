@@ -2,8 +2,7 @@
 import datetime
 from django.conf import settings
 from rest_framework import exceptions
-from rest_framework.authentication import TokenAuthentication
-from rest_framework import permissions
+from rest_framework.authentication import TokenAuthentication,SessionAuthentication
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -35,7 +34,7 @@ class ExpiringTokenAuthentication(TokenAuthentication):
         return (token.user, token)
 
 
-class IsOwnerOnly(permissions.BasePermission):
-    authenticated_users_only = True
-    def has_object_permission(self, request, view, obj):
-        return request.user and (request.user.is_authenticated() or not self.authenticated_users_only) and obj.owner==request.user
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+
+    def enforce_csrf(self, request):
+        return

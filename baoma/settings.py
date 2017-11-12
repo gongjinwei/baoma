@@ -138,7 +138,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'rest_framework.authentication.SessionAuthentication',
-        'ims_fa.utils.CsrfExemptSessionAuthentication',
+        'ims_fa.authentication.CsrfExemptSessionAuthentication',
         'ims_fa.authentication.ExpiringTokenAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS':(
