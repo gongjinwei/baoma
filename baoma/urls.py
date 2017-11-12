@@ -19,6 +19,7 @@ from django.contrib import admin
 from rest_framework.documentation import include_docs_urls
 from ims_fa.views import ObtainExpireAuthToken
 from django.views.static import serve
+from django.views.generic.base import RedirectView
 from .settings import MEDIA_ROOT ,STATIC_ROOT
 
 urlpatterns = [
@@ -28,5 +29,6 @@ urlpatterns = [
     url(r'^api/',include('ims_fa.urls',namespace='api')),
     url(r'^media/(?P<path>.*$)',serve,{'document_root': MEDIA_ROOT}),
     # url(r'^static/(?P<path>.*$)',serve,{'document_root': STATIC_ROOT}),
-    url(r'^docs/',include_docs_urls(title='BaoMa API'))
+    url(r'^docs/',include_docs_urls(title='BaoMa API')),
+    url(r'^favicon.ico$',RedirectView.as_view(url=r'media/favicon.ico'))
 ]
