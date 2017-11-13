@@ -76,11 +76,17 @@ class TaskOrderView(views.APIView):
     """
     输入task_id调出所有相关的订单列表
     """
+
     def get(self,request,pk,format=None):
         """
         :param pk: for task_id
         """
+
         queryset=models.Order.objects.filter(publish_id__task_id=pk)
+        if request.user.is_superuser:
+            pass
+        else:
+            queryset= queryset.filter(publish_id__task_id__owner_id=request.user.id)
         serializer = serializers.OrderSerializer(queryset,many=True)
         return Response(serializer.data)
 
