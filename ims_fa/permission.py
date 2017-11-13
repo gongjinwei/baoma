@@ -43,7 +43,7 @@ class UserPermissionFilterBackend(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         """
-            如果是超级用户不对它进行过滤，普通用户根据owner_id进行判断
+            如果是超级用户不对它进行过滤，普通用户根据view.filter_from进行判断
         """
         user = request.user
         if user.is_superuser:
