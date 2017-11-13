@@ -7,6 +7,7 @@ import operator
 from django.db import models
 from functools import reduce
 
+
 def create_permission(sender, instance, created=False, *args, **kwargs):
     from .models import Tasks
     task = instance
@@ -93,7 +94,6 @@ class ModulePermission(BasePermission):
 
         if hasattr(view, 'get_queryset'):
             queryset = view.get_queryset()
-            queryset = queryset.filter(owner_id=request.user.id)
         else:
             queryset = getattr(view, 'queryset', None)
 
