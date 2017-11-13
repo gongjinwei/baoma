@@ -119,9 +119,10 @@ class PageViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = models.Order.objects.all()
     serializer_class = serializers.OrderSerializer
-    filter_backends = [filters.OrderingFilter]
+    filter_backends = [filters.OrderingFilter,UserPermissionFilterBackend]
     ordering_fields = ['goods_title']
     ordering = ('-order_id',)
+    filter_from = ['publish_id__task_id__owner_id']
 
     @detail_route(methods=['patch'])
     def set_comment(self,request,pk=None):
