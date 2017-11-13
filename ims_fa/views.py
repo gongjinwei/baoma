@@ -8,6 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, filters, views
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from guardian.shortcuts import assign_perm
 
@@ -121,6 +122,22 @@ class OrderViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['goods_title']
     ordering = ('-order_id',)
+
+    @detail_route(methods=['patch'])
+    def set_comment(self,request,pk=None):
+        instance = models.Order.objects.get(pk=int(pk))
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            selected = request.data.get('selected',[])
+            platform_images=[]
+            if selected:
+                for show_id in selected:
+                    instance = models.ImagesShow.objects.get(pk=show_id)
+                    instance.is_selected = 1
+                    platform_images.append(instance.path)
+                    instance.save()
+            serializer.save(platform_comment_images=','.join(platform_images))
+            return Response(serializer.data)
 
 
 class ModelsViewSet(viewsets.ModelViewSet):

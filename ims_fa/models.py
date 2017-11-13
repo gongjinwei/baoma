@@ -288,7 +288,7 @@ class Images(models.Model):
 
 class ImagesShow(models.Model):
     image_id = models.AutoField(primary_key=True)
-    owner_id = models.IntegerField()
+    owner_id = models.ForeignKey('Order',related_name='imagesShow',db_column='owner_id')
     path = models.CharField(max_length=255)
     image_type = models.IntegerField()
     image_state = models.IntegerField()

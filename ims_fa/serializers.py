@@ -9,10 +9,20 @@ class AdminSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ImagesShowSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ImagesShow
+        fields = '__all__'
+
+
 class OrderSerializer(serializers.ModelSerializer):
+    imagesShow = ImagesShowSerializer(read_only=True,many=True)
+
     class Meta:
         model = models.Order
         fields = '__all__'
+        read_only_fields=('member_id','publish_id')
 
 
 class PublishSerializer(serializers.ModelSerializer):
@@ -29,7 +39,7 @@ class TasksSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Tasks
         fields = '__all__'
-        read_only_fields = ('owner',)
+        read_only_fields = ('owner','store_id')
 
 
 class StoresSerializer(serializers.ModelSerializer):
@@ -37,13 +47,13 @@ class StoresSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Stores
         fields = '__all__'
+        read_only_fields=('merchant_id',)
 
 
-class SaddressSerializer(serializers.HyperlinkedModelSerializer):
+class SaddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Saddress
         fields = '__all__'
-        depth=1
 
 
 class MerchantsSerializer(serializers.ModelSerializer):
@@ -99,13 +109,6 @@ class ImagesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Images
-        fields = '__all__'
-
-
-class ImagesShowSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.ImagesShow
         fields = '__all__'
 
 
