@@ -16,7 +16,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class PublishSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.username')
     task_id = serializers.ReadOnlyField(source='task_id.task_name')
 
     class Meta:

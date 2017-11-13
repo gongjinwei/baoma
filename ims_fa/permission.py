@@ -3,7 +3,9 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from rest_framework.permissions import BasePermission
 from rest_framework.filters import BaseFilterBackend
-
+import operator
+from django.db import models
+from functools import reduce
 
 def create_permission(sender, instance, created=False, *args, **kwargs):
     from .models import Tasks
@@ -37,7 +39,7 @@ def create_permission(sender, instance, created=False, *args, **kwargs):
             Permission.objects.filter(codename=codename, content_type=content_type)
 
 
-class TaskPermissionFilterBackend(BaseFilterBackend):
+class UserPermissionFilterBackend(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         """
@@ -46,7 +48,13 @@ class TaskPermissionFilterBackend(BaseFilterBackend):
         user = request.user
         if user.is_superuser:
             return queryset
-        return queryset.filter(owner_id=request.user.id)
+        assert view.filter_from is not None,"view hasn't attribute `filter_from`"
+        assert isinstance(view.filter_from,list),"filter_from must be a list"
+        filter_from = getattr(view, 'filter_from')
+        conditions =[]
+        queries = [models.Q(**{lookup:request.user.id}) for lookup in filter_from]
+        conditions.append(reduce(operator.or_,queries))
+        return queryset.filter(reduce(operator.and_,conditions))
 
 
 class ModulePermission(BasePermission):

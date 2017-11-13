@@ -453,7 +453,6 @@ class Publish(models.Model):
     pub_surplus = models.SmallIntegerField(null=True)
     pub_finished = models.SmallIntegerField(null=True)
     pub_state = models.IntegerField(null=True)
-    owner = models.ForeignKey(User, null=True)
 
     class Meta:
         managed = False

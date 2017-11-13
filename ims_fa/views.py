@@ -5,7 +5,7 @@ import datetime
 from django.conf import settings
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets,status,filters,views
+from rest_framework import viewsets, status, filters, views
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -13,7 +13,7 @@ from guardian.shortcuts import assign_perm
 
 from . import models
 from . import serializers
-from .permission import TaskPermissionFilterBackend
+from .permission import UserPermissionFilterBackend
 
 
 class ObtainExpireAuthToken(ObtainAuthToken):
@@ -42,10 +42,11 @@ class AdminViewSet(viewsets.ModelViewSet):
 class TasksViewSet(viewsets.ModelViewSet):
     queryset = models.Tasks.objects.all()
     serializer_class = serializers.TasksSerializer
-    filter_backends = [DjangoFilterBackend,filters.SearchFilter,filters.OrderingFilter,TaskPermissionFilterBackend]
-    filter_fields =['task_platform','task_name']
-    search_fields =['task_name','goods_title']
-    ordering_fields=['task_platform']
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter, UserPermissionFilterBackend]
+    filter_fields = ['task_platform', 'task_name']
+    search_fields = ['task_name', 'goods_title']
+    ordering_fields = ['task_platform']
+    filter_from = ['owner_id']
 
     def create(self, request, *args, **kwargs):
         task_serializer = self.get_serializer(data=request.data)
@@ -53,7 +54,7 @@ class TasksViewSet(viewsets.ModelViewSet):
         task_serializer.is_valid(raise_exception=True)
         self.perform_create(task_serializer)
 
-        assign_perm('view_task',self.request.user,task_serializer.instance)
+        assign_perm('view_task', self.request.user, task_serializer.instance)
         pub_date = request.data.get('pubs_start', '')
         time_array = request.data.get('time_array', [])
         if time_array and pub_date:
@@ -64,7 +65,8 @@ class TasksViewSet(viewsets.ModelViewSet):
                     publish_serializer.is_valid(raise_exception=True)
                     pub_start = pub_date + datetime.timedelta(hours=index)
                     pub_start = pub_start.timestamp()
-                    publish_serializer.save(task_id=task_serializer.instance,owner=request.user,pub_start=pub_start,pub_quantity=at)
+                    publish_serializer.save(task_id=task_serializer.instance, owner=request.user, pub_start=pub_start,
+                                            pub_quantity=at)
         headers = self.get_success_headers(task_serializer.data)
         return Response(task_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -77,17 +79,17 @@ class TaskOrderView(views.APIView):
     输入task_id调出所有相关的订单列表
     """
 
-    def get(self,request,pk,format=None):
+    def get(self, request, pk, format=None):
         """
         :param pk: for task_id
         """
 
-        queryset=models.Order.objects.filter(publish_id__task_id=pk)
+        queryset = models.Order.objects.filter(publish_id__task_id=pk)
         if request.user.is_superuser:
             pass
         else:
-            queryset= queryset.filter(publish_id__task_id__owner_id=request.user.id)
-        serializer = serializers.OrderSerializer(queryset,many=True)
+            queryset = queryset.filter(publish_id__task_id__owner_id=request.user.id)
+        serializer = serializers.OrderSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
@@ -104,9 +106,8 @@ class SaddressViewSet(viewsets.ModelViewSet):
 class PublishViewSet(viewsets.ModelViewSet):
     queryset = models.Publish.objects.all()
     serializer_class = serializers.PublishSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+    filter_backends = [UserPermissionFilterBackend]
+    filter_from = ['task_id__owner_id']
 
 
 class PageViewSet(viewsets.ModelViewSet):
@@ -117,9 +118,9 @@ class PageViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = models.Order.objects.all()
     serializer_class = serializers.OrderSerializer
-    filter_backends=[filters.OrderingFilter]
-    ordering_fields=['goods_title']
-    ordering=('-order_id',)
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['goods_title']
+    ordering = ('-order_id',)
 
 
 class ModelsViewSet(viewsets.ModelViewSet):
@@ -175,4 +176,3 @@ class BlogPostViewSet(viewsets.ModelViewSet):
 class BlogCategoryViewSet(viewsets.ModelViewSet):
     queryset = models.BlogCategory.objects.all()
     serializer_class = serializers.BlogCategorySerializer
-
