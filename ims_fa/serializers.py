@@ -1,6 +1,20 @@
 # -*- coding:UTF-8 -*-
 from rest_framework import serializers
 from . import models
+import uuid
+
+
+class UUIDImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        # Image validation is a bit grungy, so we'll just outright
+        # defer to Django's implementation so we don't need to
+        # consider it, or treat PIL as a test dependency.
+        file_object = serializers.FileField.to_internal_value(self,data)
+        extension = file_object.name.split('.')[-1]
+        file_object.name='.'.join([str(uuid.uuid4()).replace('-','')[:12],extension])
+        django_field = self._DjangoImageField()
+        django_field.error_messages = self.error_messages
+        return django_field.clean(file_object)
 
 
 class AdminSerializer(serializers.ModelSerializer):
@@ -39,7 +53,7 @@ class TasksSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Tasks
         fields = '__all__'
-        read_only_fields = ('owner','store_id')
+        read_only_fields = ('owner',)
 
 
 class StoresSerializer(serializers.ModelSerializer):
@@ -92,6 +106,8 @@ class AreaSerializer(serializers.ModelSerializer):
 
 
 class ImageUpSerializer(serializers.ModelSerializer):
+
+    image = UUIDImageField(required=True)
 
     class Meta:
         model = models.ImageUp

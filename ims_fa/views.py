@@ -55,7 +55,6 @@ class TasksViewSet(viewsets.ModelViewSet):
         task_serializer.is_valid(raise_exception=True)
         self.perform_create(task_serializer)
 
-        assign_perm('view_task', self.request.user, task_serializer.instance)
         pub_date = request.data.get('pubs_start', '')
         time_array = request.data.get('time_array', [])
         if time_array and pub_date:
@@ -66,13 +65,14 @@ class TasksViewSet(viewsets.ModelViewSet):
                     publish_serializer.is_valid(raise_exception=True)
                     pub_start = pub_date + datetime.timedelta(hours=index)
                     pub_start = pub_start.timestamp()
-                    publish_serializer.save(task_id=task_serializer.instance, owner=request.user, pub_start=pub_start,
+                    publish_serializer.save(task_id=task_serializer.instance, pub_start=pub_start,
                                             pub_quantity=at)
         headers = self.get_success_headers(task_serializer.data)
         return Response(task_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        time_now = datetime.datetime.now()
+        serializer.save(owner=self.request.user,createtime=datetime.datetime.timestamp(time_now))
 
 
 class TaskOrderView(views.APIView):
