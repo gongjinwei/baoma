@@ -10,7 +10,6 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
-from guardian.shortcuts import assign_perm
 
 from . import models
 from . import serializers
@@ -97,6 +96,14 @@ class TaskOrderView(views.APIView):
 class StoresViewSet(viewsets.ModelViewSet):
     queryset = models.Stores.objects.all()
     serializer_class = serializers.StoresSerializer
+    filter_backends = [UserPermissionFilterBackend]
+    filter_from = ['merchant_id__user_id']
+
+    def perform_create(self, serializer):
+        time_now = datetime.datetime.timestamp(datetime.datetime.now())
+        u = models.User.objects.get(pk=self.request.user.id)
+        merchant=u.merchants
+        serializer.save(createtime=time_now,merchant_id=merchant)
 
 
 class SaddressViewSet(viewsets.ModelViewSet):
@@ -149,6 +156,24 @@ class ModelsViewSet(viewsets.ModelViewSet):
 class MerchantsViewSet(viewsets.ModelViewSet):
     queryset = models.Merchants.objects.all()
     serializer_class = serializers.MerchantsSerializer
+    filter_backends = [UserPermissionFilterBackend]
+    filter_from = ['user_id']
+
+    def create(self, request, *args, **kwargs):
+        """
+            只能新建一个商家！
+        """
+        if request.user.merchants:
+            return Response('你只能新建一个商家！')
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        createtime = datetime.datetime.timestamp(datetime.datetime.now())
+        serializer.save(user=self.request.user,createtime=createtime)
 
 
 class MembersViewSet(viewsets.ModelViewSet):

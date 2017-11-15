@@ -24,7 +24,6 @@ class AdminSerializer(serializers.ModelSerializer):
 
 
 class ImagesShowSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.ImagesShow
         fields = '__all__'
@@ -36,11 +35,9 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Order
         fields = '__all__'
-        read_only_fields=('member_id','publish_id')
 
 
 class PublishSerializer(serializers.ModelSerializer):
-    task_id = serializers.ReadOnlyField(source='task_id.task_name')
 
     class Meta:
         model = models.Publish
@@ -49,6 +46,7 @@ class PublishSerializer(serializers.ModelSerializer):
 
 class TasksSerializer(serializers.ModelSerializer):
     owner =serializers.ReadOnlyField(source='owner.username')
+    store_id = serializers.ReadOnlyField(source='store.store_id')
 
     class Meta:
         model = models.Tasks
@@ -57,11 +55,11 @@ class TasksSerializer(serializers.ModelSerializer):
 
 
 class StoresSerializer(serializers.ModelSerializer):
+    merchant_id =serializers.ReadOnlyField(source='merchant_id.merchant_id')
 
     class Meta:
         model = models.Stores
         fields = '__all__'
-        read_only_fields=('merchant_id',)
 
 
 class SaddressSerializer(serializers.ModelSerializer):
@@ -72,6 +70,7 @@ class SaddressSerializer(serializers.ModelSerializer):
 
 class MerchantsSerializer(serializers.ModelSerializer):
     stores = serializers.StringRelatedField(many=True,read_only=True)
+    user = serializers.ReadOnlyField(source='user.id')
 
     class Meta:
         model = models.Merchants

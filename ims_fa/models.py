@@ -351,12 +351,18 @@ class Merchants(models.Model):
     realname = models.CharField(max_length=10)
     own_shop = models.IntegerField()
     merchant_state = models.IntegerField()
-    createtime = models.IntegerField()
-    updatetime = models.IntegerField()
+    money_balance = models.DecimalField(max_digits=10, decimal_places=2,default=0,editable=False)
+    createtime = models.IntegerField(editable=False)
+    updatetime = models.IntegerField(editable=False)
+    user = models.OneToOneField(User,editable=False,null=True)
 
     class Meta:
         managed = False
         db_table = 'ims_fa_merchants'
+
+    def save(self, *args,**kwargs):
+        self.updatetime=datetime.datetime.timestamp(datetime.datetime.now())
+        super(Merchants,self).save(*args,**kwargs)
 
     def __str__(self):
         return self.realname
@@ -479,12 +485,12 @@ class Saddress(models.Model):
 
 class Stores(models.Model):
     store_id = models.AutoField(primary_key=True)
-    merchant_id = models.ForeignKey('Merchants', db_column='merchant_id', related_name='stores')
-    store_platform = models.IntegerField()
-    store_name = models.CharField(max_length=45)
-    store_url = models.CharField(max_length=45)
-    store_state = models.IntegerField()
-    createtime = models.IntegerField()
+    merchant_id = models.ForeignKey('Merchants', db_column='merchant_id', related_name='stores',editable=False)
+    store_platform = models.IntegerField(default=0)
+    store_name = models.CharField(max_length=45,default='')
+    store_url = models.CharField(max_length=45,default='')
+    store_state = models.IntegerField(default=0)
+    createtime = models.IntegerField(editable=False)
 
     class Meta:
         managed = False
@@ -496,7 +502,7 @@ class Stores(models.Model):
 
 class Tasks(models.Model):
     task_id = models.AutoField(primary_key=True)
-    store_id = models.IntegerField(null=True)
+    store = models.ForeignKey('Stores',related_name='tasks')
     task_type = models.IntegerField(default=0)
     task_name = models.CharField(max_length=50, verbose_name='任务名称', default='')
     task_platform = models.IntegerField(verbose_name='任务平台', default=0)
