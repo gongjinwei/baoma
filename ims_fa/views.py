@@ -101,8 +101,7 @@ class StoresViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         time_now = datetime.datetime.timestamp(datetime.datetime.now())
-        u = models.User.objects.get(pk=self.request.user.id)
-        merchant=u.merchants
+        merchant=self.request.user.merchants
         serializer.save(createtime=time_now,merchant_id=merchant)
 
 
