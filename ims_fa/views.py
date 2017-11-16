@@ -225,6 +225,15 @@ class ImageUpViewSet(viewsets.ModelViewSet):
     filter_backends = [UserPermissionFilterBackend]
     filter_from = ['merchant__user_id']
 
+    def create(self, request, *args, **kwargs):
+        if not hasattr(request.user, 'merchants'):
+            return Response('你必须先创建一个商家', status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def perform_create(self, serializer):
         createtime = datetime.datetime.timestamp(datetime.datetime.now())
         serializer.save(merchant=self.request.user.merchants,createtime=createtime)
