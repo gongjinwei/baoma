@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.conf import settings
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status, filters, views
+from rest_framework import viewsets, status, filters, views,serializers as ser
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import detail_route
@@ -63,7 +63,7 @@ class TasksViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         if not hasattr(request.user,'merchants'):
-            return Response('你必须先创建一个商家',status.HTTP_400_BAD_REQUEST)
+            raise ser.ValidationError('you must create a merchant first')
         task_serializer = self.get_serializer(data=request.data)
         publish_serializer = serializers.PublishSerializer(data=request.data)
         task_serializer.is_valid(raise_exception=True)
@@ -196,8 +196,8 @@ class MerchantsViewSet(viewsets.ModelViewSet):
         """
             只能新建一个商家！
         """
-        if hasattr(request.user,'merchants'):
-            return Response("你只能创建一个商家信息！")
+        if not hasattr(request.user,'merchants'):
+            raise ser.ValidationError('you must create a merchant first')
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -226,8 +226,8 @@ class ImageUpViewSet(viewsets.ModelViewSet):
     filter_from = ['merchant__user_id']
 
     def create(self, request, *args, **kwargs):
-        if not hasattr(request.user, 'merchants'):
-            return Response('你必须先创建一个商家', status.HTTP_400_BAD_REQUEST)
+        if not hasattr(request.user,'merchants'):
+            raise ser.ValidationError('you must create a merchant first')
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
