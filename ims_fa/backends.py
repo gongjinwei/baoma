@@ -13,7 +13,7 @@ class QiniuStorage(backends.QiniuStorage):
         bucket_domain2 = settings.QINIU_BUCKET_DOMAIN2
         bucket_name2=settings.QINIU_BUCKET_NAME2
         protocol = 'https://' if self.secure_url else 'http://'
-        if name.startswith("baoma/"):
+        if name.startswith("baoma/20"):
             url = urljoin(protocol + self.bucket_domain, name)
         else:
             url = urljoin(protocol + bucket_domain2, bucket_name2+name)
