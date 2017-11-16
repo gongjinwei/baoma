@@ -24,6 +24,8 @@ class AdminSerializer(serializers.ModelSerializer):
 
 
 class ImagesShowSerializer(serializers.ModelSerializer):
+    owner_id = serializers.IntegerField(source='owner_id.order_id')
+
     class Meta:
         model = models.ImagesShow
         fields = '__all__'
@@ -38,6 +40,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class PublishSerializer(serializers.ModelSerializer):
+    task_id = serializers.IntegerField(source='task_id.task_id')
 
     class Meta:
         model = models.Publish
@@ -46,7 +49,7 @@ class PublishSerializer(serializers.ModelSerializer):
 
 class TasksSerializer(serializers.ModelSerializer):
     owner =serializers.ReadOnlyField(source='owner.username')
-    store_id = serializers.ReadOnlyField(source='store.store_id')
+    store_id = serializers.IntegerField(source='store_id.store_id')
 
     class Meta:
         model = models.Tasks
@@ -63,6 +66,8 @@ class StoresSerializer(serializers.ModelSerializer):
 
 
 class SaddressSerializer(serializers.ModelSerializer):
+    merchant_id=serializers.ReadOnlyField(source='merchant_id.merchant_id')
+
     class Meta:
         model = models.Saddress
         fields = '__all__'
@@ -74,7 +79,7 @@ class MerchantsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Merchants
-        fields = '__all__'
+        exclude = ['password',]
 
 
 class PageSerializer(serializers.ModelSerializer):
@@ -105,8 +110,8 @@ class AreaSerializer(serializers.ModelSerializer):
 
 
 class ImageUpSerializer(serializers.ModelSerializer):
-
     image = UUIDImageField(required=True)
+    merchant = serializers.ReadOnlyField(source='merchant.merchant_id')
 
     class Meta:
         model = models.ImageUp
@@ -145,6 +150,14 @@ class BlogCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.BlogCategory
+        fields = '__all__'
+
+
+class ConsumeRecordsSerializer(serializers.ModelSerializer):
+    merchant_id = serializers.ReadOnlyField(source='merchant_id.merchant_id')
+
+    class Meta:
+        model = models.ConsumeRecords
         fields = '__all__'
 
 

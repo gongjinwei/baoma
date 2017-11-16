@@ -48,26 +48,47 @@ class TasksViewSet(viewsets.ModelViewSet):
     ordering_fields = ['task_platform']
     filter_from = ['owner_id']
 
+    def minus_task_fee(self):
+        remaining_money=self.request.user.merchants.money_balance
+        pub_quantity = self.request.data.get('pub_quantity',0)
+        goods_price = self.request.data.get('goods_price',0)
+        goods_freight=self.request.data.get('goods_freight',0)
+        task_type=self.request.data.get('goods_freight',0)
+        per_publish =task_type*20+60+goods_price+goods_freight
+        total_fee = pub_quantity*(per_publish)
+        if remaining_money>=total_fee:
+            return (True,total_fee)
+        return (False,0)
+
     def create(self, request, *args, **kwargs):
         task_serializer = self.get_serializer(data=request.data)
-
+        publish_serializer = serializers.PublishSerializer(data=request.data)
         task_serializer.is_valid(raise_exception=True)
-        self.perform_create(task_serializer)
+        publish_serializer.is_valid(raise_exception=True)
+        val,total_fee=self.minus_task_fee()
+        if val:
+            merchant_instance = self.request.user.merchants
+            merchant_instance.money_balance = merchant_instance.money_balance - total_fee
+            merchant_instance.save()
+            self.perform_create(task_serializer)
 
-        pub_date = request.data.get('pubs_start', '')
-        time_array = request.data.get('time_array', [])
-        if time_array and pub_date:
-            pub_date = datetime.datetime.strptime(pub_date, '%Y-%m-%d')
-            for index, at in enumerate(time_array):
-                if at:
-                    publish_serializer = serializers.PublishSerializer(data=request.data)
-                    publish_serializer.is_valid(raise_exception=True)
-                    pub_start = pub_date + datetime.timedelta(hours=index)
-                    pub_start = pub_start.timestamp()
-                    publish_serializer.save(task_id=task_serializer.instance, pub_start=pub_start,
-                                            pub_quantity=at)
-        headers = self.get_success_headers(task_serializer.data)
-        return Response(task_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            pub_date = request.data.get('pubs_start', '')
+            time_array = request.data.get('time_array', [])
+            if time_array and pub_date:
+                pub_date = datetime.datetime.strptime(pub_date, '%Y-%m-%d')
+                for index, at in enumerate(time_array):
+                    if at:
+                        publish_serializer = serializers.PublishSerializer(data=request.data)
+                        publish_serializer.is_valid(raise_exception=True)
+                        pub_start = pub_date + datetime.timedelta(hours=index)
+                        pub_start = pub_start.timestamp()
+                        publish_serializer.save(task_id=task_serializer.instance, pub_start=pub_start,
+                                                pub_quantity=at)
+
+            headers = self.get_success_headers(task_serializer.data)
+            return Response(task_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+        return Response("你的余额不足，请充值")
 
     def perform_create(self, serializer):
         time_now = datetime.datetime.now()
@@ -108,6 +129,11 @@ class StoresViewSet(viewsets.ModelViewSet):
 class SaddressViewSet(viewsets.ModelViewSet):
     queryset = models.Saddress.objects.all()
     serializer_class = serializers.SaddressSerializer
+    filter_backends = [UserPermissionFilterBackend]
+    filter_from = ['merchant_id__user_id']
+
+    def perform_create(self, serializer):
+        serializer.save(merchant_id=self.request.user.merchants)
 
 
 class PublishViewSet(viewsets.ModelViewSet):
@@ -132,17 +158,22 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['patch'])
     def set_comment(self,request,pk=None):
-        instance = models.Order.objects.get(pk=int(pk))
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        order_instance = models.Order.objects.get(pk=int(pk))
+
+        serializer = self.get_serializer(order_instance, data=request.data, partial=True)
         if serializer.is_valid():
             selected = request.data.get('selected',[])
             platform_images=[]
+            all_images = models.ImagesShow.objects.filter(owner_id=int(pk))
             if selected:
-                for show_id in selected:
-                    instance = models.ImagesShow.objects.get(pk=show_id)
-                    instance.is_selected = 1
-                    platform_images.append(instance.path)
-                    instance.save()
+                for image in all_images:
+                    if image.image_id in selected:
+                        image.is_selected = 1
+                        platform_images.append(image.path)
+                        image.save()
+                    else:
+                        image.is_selected=0
+                        image.save()
             serializer.save(platform_comment_images=','.join(platform_images))
             return Response(serializer.data)
 
@@ -162,8 +193,8 @@ class MerchantsViewSet(viewsets.ModelViewSet):
         """
             只能新建一个商家！
         """
-        if request.user.merchants:
-            return Response('你只能新建一个商家！')
+        if hasattr(request.user,'merchants'):
+            return Response("你只能创建一个商家信息！")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -188,6 +219,12 @@ class AreaViewSet(viewsets.ModelViewSet):
 class ImageUpViewSet(viewsets.ModelViewSet):
     queryset = models.ImageUp.objects.all()
     serializer_class = serializers.ImageUpSerializer
+    filter_backends = [UserPermissionFilterBackend]
+    filter_from = ['merchant__user_id']
+
+    def perform_create(self, serializer):
+        createtime = datetime.datetime.timestamp(datetime.datetime.now())
+        serializer.save(merchant=self.request.user.merchants,createtime=createtime)
 
 
 class FeedbackViewSet(viewsets.ModelViewSet):
@@ -218,3 +255,10 @@ class BlogPostViewSet(viewsets.ModelViewSet):
 class BlogCategoryViewSet(viewsets.ModelViewSet):
     queryset = models.BlogCategory.objects.all()
     serializer_class = serializers.BlogCategorySerializer
+
+
+class ConsumeRecordsViewSet(viewsets.ModelViewSet):
+    queryset = models.ConsumeRecords.objects.all()
+    serializer_class = serializers.ConsumeRecordsSerializer
+    filter_backends = [UserPermissionFilterBackend]
+    filter_from = ['merchant_id__user_id']

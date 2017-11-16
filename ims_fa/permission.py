@@ -6,6 +6,9 @@ from rest_framework.filters import BaseFilterBackend
 import operator
 from django.db import models
 from functools import reduce
+from django.core.cache import cache
+
+from datetime import datetime
 
 
 def create_permission(sender, instance, created=False, *args, **kwargs):
@@ -112,3 +115,27 @@ class ModulePermission(BasePermission):
             (request.user.is_authenticated() or not self.authenticated_users_only)
             and self.has_perms(request.user, self.get_module_perms(view))
         )
+
+
+def create_records(sender, instance, created=False, *args, **kwargs):
+    if not created and instance.merchant_id:
+        from .models import ConsumeRecords, Merchants
+        before_minus = Merchants.objects.get(pk=instance.merchant_id).money_balance
+        if instance.money_balance != before_minus:
+            records=ConsumeRecords()
+            records.merchant_id=instance
+            records.merchant_name=instance.realname
+            records.pay_type = 2
+            if before_minus>instance.money_balance:
+                records.income = 0
+                records.expense=before_minus-instance.money_balance
+                records.remark='发单扣款'
+            else:
+                records.income = instance.money_balance-before_minus
+                records.expense = 0
+                records.remark = '充值'
+            records.balance = instance.money_balance
+            records.createtime=datetime.timestamp(datetime.now())
+            records.operator_id=instance.user.id
+            records.operator_name=instance.user.username
+            records.save()

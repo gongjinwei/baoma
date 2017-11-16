@@ -37,6 +37,7 @@ router.register(r'imagesshow', views.ImagesShowViewSet)
 router.register(r'blogcomment', views.BlogCommentViewSet)
 router.register(r'blogpost', views.BlogPostViewSet)
 router.register(r'blogcategory', views.BlogCategoryViewSet)
+router.register(r'consumerecords', views.ConsumeRecordsViewSet)
 
 urlpatterns = [
     url('^task-order/(?P<pk>[0-9]+)/$', views.TaskOrderView.as_view())

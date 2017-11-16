@@ -1,7 +1,10 @@
 # -*- coding:UTF-8 -*-
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import pre_save
 import datetime
+from .permission import create_records
+
 
 class Admin(models.Model):
     username = models.CharField(max_length=20)
@@ -293,9 +296,9 @@ class ImagesShow(models.Model):
     owner_id = models.ForeignKey('Order',related_name='imagesShow',db_column='owner_id')
     path = models.CharField(max_length=255)
     image_type = models.IntegerField()
-    image_state = models.IntegerField()
-    is_selected = models.IntegerField()
-    createtime = models.IntegerField()
+    image_state = models.IntegerField(editable=False)
+    is_selected = models.IntegerField(editable=False)
+    createtime = models.IntegerField(editable=False)
 
     class Meta:
         managed = False
@@ -344,14 +347,14 @@ class Members(models.Model):
 class Merchants(models.Model):
     merchant_id = models.AutoField(primary_key=True)
     mobile = models.CharField(max_length=11)
-    password = models.CharField(max_length=32)
-    salt = models.CharField(max_length=8)
-    wechat = models.CharField(max_length=30)
-    qq = models.CharField(max_length=15)
+    password = models.CharField(max_length=32,default='')
+    salt = models.CharField(max_length=8,default='')
+    wechat = models.CharField(max_length=30,default='')
+    qq = models.CharField(max_length=15,default='')
     realname = models.CharField(max_length=10)
-    own_shop = models.IntegerField()
-    merchant_state = models.IntegerField()
-    money_balance = models.DecimalField(max_digits=10, decimal_places=2,default=0,editable=False)
+    own_shop = models.IntegerField(editable=False,default=0)
+    merchant_state = models.IntegerField(editable=False,default=0)
+    money_balance = models.DecimalField(max_digits=10, decimal_places=2,default=0)
     createtime = models.IntegerField(editable=False)
     updatetime = models.IntegerField(editable=False)
     user = models.OneToOneField(User,editable=False,null=True)
@@ -366,6 +369,9 @@ class Merchants(models.Model):
 
     def __str__(self):
         return self.realname
+
+
+pre_save.connect(create_records,Merchants)
 
 
 class Models(models.Model):
@@ -455,7 +461,7 @@ class Page(models.Model):
 class Publish(models.Model):
     publish_id = models.AutoField(primary_key=True)
     task_id = models.ForeignKey('Tasks', db_column='task_id', related_name='publishes', null=True)
-    pub_start = models.IntegerField(null=True)
+    pub_start = models.IntegerField()
     pub_end = models.IntegerField(default=0)
     pub_quantity = models.SmallIntegerField(default=0)
     pub_surplus = models.SmallIntegerField(default=0)
@@ -469,14 +475,14 @@ class Publish(models.Model):
 
 class Saddress(models.Model):
     address_id = models.AutoField(primary_key=True)
-    merchant_id = models.ForeignKey('Merchants', db_column='merchant_id', related_name='addresses')
+    merchant_id = models.ForeignKey('Merchants', db_column='merchant_id', related_name='addresses',editable=False)
     consignee = models.CharField(max_length=20)
     phone = models.CharField(max_length=12)
     province = models.CharField(max_length=20)
     city = models.CharField(max_length=20)
     district = models.CharField(max_length=20)
     address = models.CharField(max_length=45)
-    is_default = models.IntegerField()
+    is_default = models.IntegerField(default=0)
 
     class Meta:
         managed = False
@@ -489,7 +495,7 @@ class Stores(models.Model):
     store_platform = models.IntegerField(default=0)
     store_name = models.CharField(max_length=45,default='')
     store_url = models.CharField(max_length=45,default='')
-    store_state = models.IntegerField(default=0)
+    store_state = models.IntegerField(default=0,editable=False)
     createtime = models.IntegerField(editable=False)
 
     class Meta:
@@ -502,8 +508,8 @@ class Stores(models.Model):
 
 class Tasks(models.Model):
     task_id = models.AutoField(primary_key=True)
-    store = models.ForeignKey('Stores',related_name='tasks')
-    task_type = models.IntegerField(default=0)
+    store_id = models.ForeignKey('Stores',db_column='store_id',related_name='tasks')
+    task_type = models.IntegerField()
     task_name = models.CharField(max_length=50, verbose_name='任务名称', default='')
     task_platform = models.IntegerField(verbose_name='任务平台', default=0)
     goods_title = models.CharField(max_length=80, default='')
@@ -511,7 +517,7 @@ class Tasks(models.Model):
     goods_image = models.CharField(max_length=255, default='')
     sku_image = models.CharField(max_length=255, default='')
     goods_body = models.TextField(default='')
-    goods_price = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    goods_price = models.DecimalField(max_digits=8, decimal_places=2)
     goods_weight = models.FloatField(default=0)
     goods_freight = models.DecimalField(max_digits=8, decimal_places=2, default=0)
     task_commission = models.DecimalField(max_digits=8, decimal_places=2, default=0)
@@ -546,9 +552,9 @@ class Tasks(models.Model):
     photograph_scene = models.CharField(max_length=45, default='')
     photograph_collocation = models.CharField(max_length=45, default='')
     photograph_images = models.CharField(max_length=255, default='')
-    photograph_attention = models.TextField(default='')
+    photograph_attention = models.TextField(default='',null=True)
     address_id = models.IntegerField(null=True)
-    return_attention = models.TextField(default='')
+    return_attention = models.TextField(default='',null=True)
     task_state = models.IntegerField(default=0)
     createtime = models.IntegerField(default=0,editable=False)
     updatetime = models.IntegerField(default=0,editable=False)
@@ -570,3 +576,23 @@ class Tasks(models.Model):
 
 class ImageUp(models.Model):
     image = models.ImageField(upload_to='baoma/%Y%m', max_length=255)
+    merchant=models.ForeignKey('Merchants',on_delete=models.DO_NOTHING,editable=False,null=True)
+    createtime=models.IntegerField(editable=False)
+
+
+class ConsumeRecords(models.Model):
+    consume_id = models.AutoField(primary_key=True)
+    merchant_id = models.ForeignKey('Merchants',related_name='consumerecords',db_column='merchant_id',on_delete=models.DO_NOTHING)
+    merchant_name = models.CharField(max_length=55)
+    pay_type = models.IntegerField()
+    income = models.DecimalField(max_digits=8, decimal_places=2)
+    expense = models.DecimalField(max_digits=8, decimal_places=2)
+    balance = models.DecimalField(max_digits=8, decimal_places=2)
+    remark = models.CharField(max_length=255)
+    createtime = models.IntegerField()
+    operator_id = models.IntegerField()
+    operator_name = models.CharField(max_length=55)
+
+    class Meta:
+        managed = False
+        db_table = 'ims_fa_consume_records'
