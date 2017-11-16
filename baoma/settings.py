@@ -160,6 +160,8 @@ QINIU_SECRET_KEY='Yb33ujAu-AvoAyhZOOCNgk2imDUyEmqqsMBEys7d'
 QINIU_BUCKET_NAME='weibar'
 QINIU_BUCKET_DOMAIN='res.yiwuwei.com'
 
-MEDIA_URL = QINIU_BUCKET_DOMAIN+'/media/'
+QINIU_BUCKET_DOMAIN2='mp.yiwuwei.com'
+QINIU_BUCKET_NAME2='attachment/'
 DEFAULT_FILE_STORAGE = 'ims_fa.backends.QiniuStorage'
+# MEDIA_URL = QINIU_BUCKET_DOMAIN+'/media/'
 

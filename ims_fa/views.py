@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 import datetime
+from decimal import Decimal
 from django.conf import settings
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -51,8 +52,8 @@ class TasksViewSet(viewsets.ModelViewSet):
     def minus_task_fee(self):
         remaining_money=self.request.user.merchants.money_balance
         pub_quantity = int(self.request.data.get('pub_quantity',0))
-        goods_price = int(self.request.data.get('goods_price',0))
-        goods_freight=int(self.request.data.get('goods_freight',0))
+        goods_price = Decimal(self.request.data.get('goods_price',0))
+        goods_freight=Decimal(self.request.data.get('goods_freight',0))
         task_type=int(self.request.data.get('task_type',0))
         per_publish =task_type*20+60+goods_price+goods_freight
         total_fee = pub_quantity*(per_publish)
@@ -242,6 +243,8 @@ class ImagesViewSet(viewsets.ModelViewSet):
 class ImagesShowViewSet(viewsets.ModelViewSet):
     queryset = models.ImagesShow.objects.all()
     serializer_class = serializers.ImagesShowSerializer
+    filter_backends = [UserPermissionFilterBackend]
+    filter_from = ['owner_id__publish_id__task_id__owner_id']
 
 
 class BlogCommentViewSet(viewsets.ModelViewSet):

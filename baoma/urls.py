@@ -27,7 +27,7 @@ urlpatterns = [
     url(r'^api-token-auth/',ObtainExpireAuthToken.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api/',include('ims_fa.urls',namespace='api')),
-    url(r'^media/(?P<path>.*$)',serve,{'document_root': MEDIA_ROOT}),
+    # url(r'^media/(?P<path>.*$)',serve,{'document_root': MEDIA_ROOT}),
     # url(r'^static/(?P<path>.*$)',serve,{'document_root': STATIC_ROOT}),
     url(r'^docs/',include_docs_urls(title='BaoMa API')),
     url(r'^favicon.ico$',RedirectView.as_view(url=r'media/favicon.ico'))
