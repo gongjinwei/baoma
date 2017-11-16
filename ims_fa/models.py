@@ -411,7 +411,7 @@ class Order(models.Model):
     platform_comment_images = models.CharField(max_length=1024)
     goods_title = models.CharField(max_length=80)
     goods_url = models.CharField(max_length=255)
-    goods_image = models.CharField(max_length=255,editable=False)
+    goods_image = models.ImageField(max_length=255,editable=False)
     goods_price = models.DecimalField(max_digits=8, decimal_places=2)
     goods_freight = models.DecimalField(max_digits=8, decimal_places=2)
     task_commission = models.DecimalField(max_digits=6, decimal_places=2)

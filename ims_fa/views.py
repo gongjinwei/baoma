@@ -86,7 +86,7 @@ class TasksViewSet(viewsets.ModelViewSet):
                         pub_start = pub_date + datetime.timedelta(hours=index)
                         pub_start = pub_start.timestamp()
                         publish_serializer.save(task_id=task_serializer.instance, pub_start=pub_start,
-                                                pub_quantity=at)
+                                                pub_quantity=at,pub_surplus=at)
 
             headers = self.get_success_headers(task_serializer.data)
             return Response(task_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
