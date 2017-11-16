@@ -124,7 +124,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
+# MEDIA_URL = '/media/'
 STATIC_ROOT =os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -154,4 +154,12 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend', # this is default
     'guardian.backends.ObjectPermissionBackend',
 )
+
+QINIU_ACCESS_KEY='CsXZpUmY1L4ivYER9KYcIJw3mLmWFr8WhAhHNAlE'
+QINIU_SECRET_KEY='Yb33ujAu-AvoAyhZOOCNgk2imDUyEmqqsMBEys7d'
+QINIU_BUCKET_NAME='weibar'
+QINIU_BUCKET_DOMAIN='res.yiwuwei.com'
+
+MEDIA_URL = QINIU_BUCKET_DOMAIN+'/media/'
+DEFAULT_FILE_STORAGE = 'ims_fa.backends.QiniuStorage'
 

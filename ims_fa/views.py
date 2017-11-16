@@ -50,10 +50,10 @@ class TasksViewSet(viewsets.ModelViewSet):
 
     def minus_task_fee(self):
         remaining_money=self.request.user.merchants.money_balance
-        pub_quantity = self.request.data.get('pub_quantity',0)
-        goods_price = self.request.data.get('goods_price',0)
-        goods_freight=self.request.data.get('goods_freight',0)
-        task_type=self.request.data.get('goods_freight',0)
+        pub_quantity = int(self.request.data.get('pub_quantity',0))
+        goods_price = int(self.request.data.get('goods_price',0))
+        goods_freight=int(self.request.data.get('goods_freight',0))
+        task_type=int(self.request.data.get('task_type',0))
         per_publish =task_type*20+60+goods_price+goods_freight
         total_fee = pub_quantity*(per_publish)
         if remaining_money>=total_fee:
@@ -61,6 +61,8 @@ class TasksViewSet(viewsets.ModelViewSet):
         return (False,0)
 
     def create(self, request, *args, **kwargs):
+        if not hasattr(request.user,'merchants'):
+            return Response('你必须先创建一个商家',status.HTTP_400_BAD_REQUEST)
         task_serializer = self.get_serializer(data=request.data)
         publish_serializer = serializers.PublishSerializer(data=request.data)
         task_serializer.is_valid(raise_exception=True)

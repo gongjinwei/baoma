@@ -11,7 +11,7 @@ class UUIDImageField(serializers.ImageField):
         # consider it, or treat PIL as a test dependency.
         file_object = serializers.FileField.to_internal_value(self,data)
         extension = file_object.name.split('.')[-1]
-        file_object.name='.'.join([str(uuid.uuid4()).replace('-','')[:12],extension])
+        file_object.name='.'.join([str(uuid.uuid4()).replace('-','')[:20],extension])
         django_field = self._DjangoImageField()
         django_field.error_messages = self.error_messages
         return django_field.clean(file_object)
@@ -40,7 +40,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class PublishSerializer(serializers.ModelSerializer):
-    task_id = serializers.IntegerField(source='task_id.task_id')
+    task_id = serializers.ReadOnlyField(source='task_id.task_id')
 
     class Meta:
         model = models.Publish
@@ -49,7 +49,6 @@ class PublishSerializer(serializers.ModelSerializer):
 
 class TasksSerializer(serializers.ModelSerializer):
     owner =serializers.ReadOnlyField(source='owner.username')
-    store_id = serializers.IntegerField(source='store_id.store_id')
 
     class Meta:
         model = models.Tasks
@@ -58,7 +57,7 @@ class TasksSerializer(serializers.ModelSerializer):
 
 
 class StoresSerializer(serializers.ModelSerializer):
-    merchant_id =serializers.ReadOnlyField(source='merchant_id.merchant_id')
+    merchant_id =serializers.ReadOnlyField(source='merchant_id.merchant_id') # 设置了readOnly的字段不会在写入时被检测到
 
     class Meta:
         model = models.Stores

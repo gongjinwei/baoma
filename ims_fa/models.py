@@ -461,7 +461,7 @@ class Page(models.Model):
 class Publish(models.Model):
     publish_id = models.AutoField(primary_key=True)
     task_id = models.ForeignKey('Tasks', db_column='task_id', related_name='publishes', null=True)
-    pub_start = models.IntegerField()
+    pub_start = models.IntegerField(null=True)
     pub_end = models.IntegerField(default=0)
     pub_quantity = models.SmallIntegerField(default=0)
     pub_surplus = models.SmallIntegerField(default=0)
@@ -575,7 +575,7 @@ class Tasks(models.Model):
 
 
 class ImageUp(models.Model):
-    image = models.ImageField(upload_to='baoma/%Y%m', max_length=255)
+    image = models.ImageField(upload_to='baoma/%Y%m%d', max_length=255)
     merchant=models.ForeignKey('Merchants',on_delete=models.DO_NOTHING,editable=False,null=True)
     createtime=models.IntegerField(editable=False)
 
