@@ -79,7 +79,7 @@ class TasksViewSet(viewsets.ModelViewSet):
             merchant_instance.save()
             self.perform_create(task_serializer)
 
-            pub_date = request.data.get('pubs_start', '')
+            pub_date = request.data.get('pubs_start')
             time_array = request.data.get('time_array', [])
             if time_array and pub_date:
                 pub_date = datetime.datetime.strptime(pub_date, '%Y-%m-%d')
@@ -113,9 +113,7 @@ class TaskOrderView(views.APIView):
         """
 
         queryset = models.Order.objects.filter(publish_id__task_id=pk)
-        if request.user.is_superuser:
-            pass
-        else:
+        if not request.user.is_superuser:
             queryset = queryset.filter(publish_id__task_id__owner_id=request.user.id)
         serializer = serializers.OrderSerializer(queryset, many=True)
         return Response(serializer.data)
@@ -148,6 +146,7 @@ class PublishViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.PublishSerializer
     filter_backends = [UserPermissionFilterBackend]
     filter_from = ['task_id__owner_id']
+    ordering = ('-publish_id',)
 
 
 class PageViewSet(viewsets.ModelViewSet):
