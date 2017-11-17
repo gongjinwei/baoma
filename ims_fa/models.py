@@ -577,6 +577,7 @@ class Tasks(models.Model):
         self.search_image=self.cut_host(self.search_image)
         self.qrcode_image=self.cut_host(self.qrcode_image)
         self.photograph_images=self.cut_host(self.photograph_images)
+        self.condition_image=self.cut_host(self.condition_image)
         self.updatetime=datetime.datetime.timestamp(datetime.datetime.now())
         super(Tasks,self).save(*args,**kwargs)
 

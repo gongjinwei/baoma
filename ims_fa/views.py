@@ -47,7 +47,8 @@ class TasksViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter, UserPermissionFilterBackend]
     filter_fields = ['task_platform', 'task_name']
     search_fields = ['task_name', 'goods_title']
-    ordering_fields = ['task_platform']
+    ordering_fields = ['task_id']
+    ordering = ['-task_id']
     filter_from = ['owner_id']
 
     def minus_task_fee(self):
@@ -145,8 +146,9 @@ class SaddressViewSet(viewsets.ModelViewSet):
 class PublishViewSet(viewsets.ModelViewSet):
     queryset = models.Publish.objects.all()
     serializer_class = serializers.PublishSerializer
-    filter_backends = [UserPermissionFilterBackend]
+    filter_backends = [filters.OrderingFilter,UserPermissionFilterBackend]
     filter_from = ['task_id__owner_id']
+    ordering_fields =['publish_id']
     ordering = ('-publish_id',)
 
 
@@ -278,5 +280,7 @@ class BlogCategoryViewSet(viewsets.ModelViewSet):
 class ConsumeRecordsViewSet(viewsets.ModelViewSet):
     queryset = models.ConsumeRecords.objects.all()
     serializer_class = serializers.ConsumeRecordsSerializer
-    filter_backends = [UserPermissionFilterBackend]
+    filter_backends = [filters.OrderingFilter,UserPermissionFilterBackend]
     filter_from = ['merchant_id__user_id']
+    ordering_fields = ['consume_id']
+    ordering = ['-consume_id']
