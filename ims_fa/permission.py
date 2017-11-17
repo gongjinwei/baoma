@@ -129,12 +129,12 @@ def create_records(sender, instance, created=False, *args, **kwargs):
             if before_minus>instance.money_balance:
                 records.income = 0
                 records.expense=before_minus-instance.money_balance
-                records.remark='publish payment'
+                records.remark='发单扣款'
             else:
                 income =instance.money_balance-before_minus
                 records.income = income
                 records.expense = 0
-                records.remark = 'deposit %s' % income
+                records.remark = '充值 %s' % income
             records.balance = instance.money_balance
             records.createtime=datetime.timestamp(datetime.now())
             records.operator_id=instance.user.id
