@@ -168,7 +168,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['patch'])
     def set_comment(self,request,pk=None):
         order_instance = models.Order.objects.get(pk=int(pk))
-
+        if not request.user.is_superuser and order_instance.publish_id.task_id.owner_id != request.user.id:
+            raise ser.ValidationError('你没有改订单的操作权限')
         serializer = self.get_serializer(order_instance, data=request.data, partial=True)
         if serializer.is_valid():
             selected = request.data.get('selected',[])
@@ -178,7 +179,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 for image in all_images:
                     if image.image_id in selected:
                         image.is_selected = 1
-                        platform_images.append(image.path)
+                        platform_images.append(image.path.name)
                         image.save()
                     else:
                         image.is_selected=0

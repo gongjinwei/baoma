@@ -27,6 +27,7 @@ class ImagesShowSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     imagesShow = ImagesShowSerializer(read_only=True,many=True)
+    taobao = serializers.ReadOnlyField(source='member_id.taobao')
 
     class Meta:
         model = models.Order
