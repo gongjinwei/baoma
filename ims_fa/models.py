@@ -1,4 +1,6 @@
 # -*- coding:UTF-8 -*-
+from urllib.parse import urlsplit
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_save
@@ -570,8 +572,19 @@ class Tasks(models.Model):
         db_table = 'ims_fa_tasks'
 
     def save(self,*args,**kwargs):
+        self.goods_image=self.cut_host(self.goods_image)
+        self.sku_image=self.cut_host(self.sku_image)
+        self.search_image=self.cut_host(self.search_image)
+        self.qrcode_image=self.cut_host(self.qrcode_image)
+        self.photograph_images=self.cut_host(self.photograph_images)
         self.updatetime=datetime.datetime.timestamp(datetime.datetime.now())
         super(Tasks,self).save(*args,**kwargs)
+
+    def cut_host(self,charfield):
+        if charfield.startswith('http'):
+            charfield = urlsplit(charfield).path
+
+        return charfield
 
 
 class ImageUp(models.Model):
