@@ -68,6 +68,10 @@ class TasksViewSet(viewsets.ModelViewSet):
         publish_serializer = serializers.PublishSerializer(data=request.data)
         task_serializer.is_valid(raise_exception=True)
         publish_serializer.is_valid(raise_exception=True)
+        if not request.user.is_superuser and task_serializer.validated_data['store_id'].merchant_id.user_id!=request.user.id:
+            raise ser.ValidationError('你不能对不属于你的店铺做任务发布')
+        if not request.data.get('pubs_start',''):
+            raise ser.ValidationError('请填写体验日期')
         val,total_fee=self.minus_task_fee()
         if val:
             merchant_instance = self.request.user.merchants
