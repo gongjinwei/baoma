@@ -17,12 +17,6 @@ class UUIDImageField(serializers.ImageField):
         return django_field.clean(file_object)
 
 
-class AdminSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Admin
-        fields = '__all__'
-
-
 class ImagesShowSerializer(serializers.ModelSerializer):
     owner_id = serializers.IntegerField(source='owner_id.order_id')
 
@@ -87,68 +81,12 @@ class PageSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class MembersSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Members
-        fields = '__all__'
-
-
-class ModelsSerializer(serializers.ModelSerializer):
-    member_id = MembersSerializer()
-
-    class Meta:
-        model = models.Models
-        fields = '__all__'
-
-
-class AreaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Area
-        fields = '__all__'
-
-
 class ImageUpSerializer(serializers.ModelSerializer):
     image = UUIDImageField(required=True)
     merchant = serializers.ReadOnlyField(source='merchant.merchant_id')
 
     class Meta:
         model = models.ImageUp
-        fields = '__all__'
-
-
-class FeedbackSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Feedback
-        fields = '__all__'
-
-
-class ImagesSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Images
-        fields = '__all__'
-
-
-class BlogCommentSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.BlogComment
-        fields = '__all__'
-
-
-class BlogPostSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.BlogPost
-        fields = '__all__'
-
-
-class BlogCategorySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.BlogCategory
         fields = '__all__'
 
 

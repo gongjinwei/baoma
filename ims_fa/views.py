@@ -36,11 +36,6 @@ class ObtainExpireAuthToken(ObtainAuthToken):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class AdminViewSet(viewsets.ModelViewSet):
-    queryset = models.Admin.objects.all()
-    serializer_class = serializers.AdminSerializer
-
-
 class TasksViewSet(viewsets.ModelViewSet):
     queryset = models.Tasks.objects.all()
     serializer_class = serializers.TasksSerializer
@@ -50,6 +45,17 @@ class TasksViewSet(viewsets.ModelViewSet):
     ordering_fields = ['task_id']
     ordering = ['-task_id']
     filter_from = ['owner_id']
+
+    @detail_route()
+    def orders(self, request, pk=None):
+        """
+        :param pk: for task_id
+        """
+        queryset = models.Order.objects.filter(publish_id__task_id=pk)
+        if not request.user.is_superuser:
+            queryset = queryset.filter(publish_id__task_id__owner_id=request.user.id)
+        serializer = serializers.OrderSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def minus_task_fee(self):
         remaining_money=self.request.user.merchants.money_balance
@@ -108,7 +114,6 @@ class TaskOrderView(views.APIView):
     """
     输入task_id调出所有相关的订单列表
     """
-
     def get(self, request, pk, format=None):
         """
         :param pk: for task_id
@@ -152,11 +157,6 @@ class PublishViewSet(viewsets.ModelViewSet):
     ordering = ('-publish_id',)
 
 
-class PageViewSet(viewsets.ModelViewSet):
-    queryset = models.Page.objects.all()
-    serializer_class = serializers.PageSerializer
-
-
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = models.Order.objects.all()
     serializer_class = serializers.OrderSerializer
@@ -187,11 +187,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
 
-class ModelsViewSet(viewsets.ModelViewSet):
-    queryset = models.Models.objects.all()
-    serializer_class = serializers.ModelsSerializer
-
-
 class MerchantsViewSet(viewsets.ModelViewSet):
     queryset = models.Merchants.objects.all()
     serializer_class = serializers.MerchantsSerializer
@@ -215,21 +210,13 @@ class MerchantsViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user,createtime=createtime)
 
 
-class MembersViewSet(viewsets.ModelViewSet):
-    queryset = models.Members.objects.all()
-    serializer_class = serializers.MembersSerializer
-
-
-class AreaViewSet(viewsets.ModelViewSet):
-    queryset = models.Area.objects.all()
-    serializer_class = serializers.AreaSerializer
-
-
 class ImageUpViewSet(viewsets.ModelViewSet):
     queryset = models.ImageUp.objects.all()
     serializer_class = serializers.ImageUpSerializer
-    filter_backends = [UserPermissionFilterBackend]
+    filter_backends = [filters.OrderingFilter,UserPermissionFilterBackend]
     filter_from = ['merchant__user_id']
+    ordering_fields = ['id']
+    ordering = ['-id']
 
     def create(self, request, *args, **kwargs):
         if not hasattr(request.user,'merchants'):
@@ -245,36 +232,13 @@ class ImageUpViewSet(viewsets.ModelViewSet):
         serializer.save(merchant=self.request.user.merchants,createtime=createtime)
 
 
-class FeedbackViewSet(viewsets.ModelViewSet):
-    queryset = models.Feedback.objects.all()
-    serializer_class = serializers.FeedbackSerializer
-
-
-class ImagesViewSet(viewsets.ModelViewSet):
-    queryset = models.Images.objects.all()
-    serializer_class = serializers.ImagesSerializer
-
-
 class ImagesShowViewSet(viewsets.ModelViewSet):
     queryset = models.ImagesShow.objects.all()
     serializer_class = serializers.ImagesShowSerializer
-    filter_backends = [UserPermissionFilterBackend]
+    filter_backends = [filters.OrderingFilter,UserPermissionFilterBackend]
     filter_from = ['owner_id__publish_id__task_id__owner_id']
-
-
-class BlogCommentViewSet(viewsets.ModelViewSet):
-    queryset = models.BlogComment.objects.all()
-    serializer_class = serializers.BlogCommentSerializer
-
-
-class BlogPostViewSet(viewsets.ModelViewSet):
-    queryset = models.BlogPost.objects.all()
-    serializer_class = serializers.BlogPostSerializer
-
-
-class BlogCategoryViewSet(viewsets.ModelViewSet):
-    queryset = models.BlogCategory.objects.all()
-    serializer_class = serializers.BlogCategorySerializer
+    ordering_fields = ['image_id']
+    ordering = ['-image_id']
 
 
 class ConsumeRecordsViewSet(viewsets.ModelViewSet):
