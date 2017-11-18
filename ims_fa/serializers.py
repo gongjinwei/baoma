@@ -52,7 +52,7 @@ class TasksSerializer(serializers.ModelSerializer):
         read_only_fields = ('owner',)
 
     def get_publish_count(self, obj):
-        publishes = models.Publish.objects.filter(task_id=obj)
+        publishes = obj.publishes
         pub_surplus = sum(publishes.values_list('pub_surplus', flat=True))
         pub_quantity = sum(publishes.values_list('pub_quantity', flat=True))
         return dict(pub_quantity=pub_quantity, pub_surplus=pub_surplus)
