@@ -490,6 +490,13 @@ class Saddress(models.Model):
         managed = False
         db_table = 'ims_fa_saddress'
 
+    def save(self,*args,**kwargs):
+        if self.is_default:
+            addresses=Saddress.objects.filter(merchant_id=self.merchant_id)
+            if addresses:
+                addresses.update(is_default=0)
+        super(Saddress,self).save(*args,**kwargs)
+
 
 class Stores(models.Model):
     store_id = models.AutoField(primary_key=True)
