@@ -24,7 +24,7 @@ from .settings import MEDIA_ROOT ,STATIC_ROOT
 
 urlpatterns = [
     url(r'^admin/',admin.site.urls),
-    url(r'^api-token-auth/',ObtainExpireAuthToken.as_view()),
+    url(r'^api-token-auth/$',ObtainExpireAuthToken.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api/',include('ims_fa.urls',namespace='api')),
     # url(r'^media/(?P<path>.*$)',serve,{'document_root': MEDIA_ROOT}),

@@ -185,7 +185,7 @@ class MerchantsViewSet(viewsets.ModelViewSet):
             只能新建一个商家！
         """
         if not hasattr(request.user,'merchants'):
-            raise ser.ValidationError('you must create a merchant first')
+            raise ser.ValidationError('you can only create one merchant instance')
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
