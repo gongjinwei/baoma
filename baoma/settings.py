@@ -125,10 +125,10 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 # MEDIA_URL = '/media/'
-STATIC_ROOT =os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES=60*10
+REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES = 60 * 10
 
 REST_FRAMEWORK = {
 
@@ -141,8 +141,12 @@ REST_FRAMEWORK = {
         'ims_fa.authentication.CsrfExemptSessionAuthentication',
         'ims_fa.authentication.ExpiringTokenAuthentication',
     ),
-    'DEFAULT_FILTER_BACKENDS':(
+    'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     # 'UPLOADED_FILES_USE_URL':False,
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
@@ -152,17 +156,16 @@ REST_FRAMEWORK = {
 CORS_ORIGIN_ALLOW_ALL = True
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend', # this is default
+    'django.contrib.auth.backends.ModelBackend',  # this is default
     'guardian.backends.ObjectPermissionBackend',
 )
 
-QINIU_ACCESS_KEY='CsXZpUmY1L4ivYER9KYcIJw3mLmWFr8WhAhHNAlE'
-QINIU_SECRET_KEY='Yb33ujAu-AvoAyhZOOCNgk2imDUyEmqqsMBEys7d'
-QINIU_BUCKET_NAME='weibar'
-QINIU_BUCKET_DOMAIN='res.yiwuwei.com'
+QINIU_ACCESS_KEY = 'CsXZpUmY1L4ivYER9KYcIJw3mLmWFr8WhAhHNAlE'
+QINIU_SECRET_KEY = 'Yb33ujAu-AvoAyhZOOCNgk2imDUyEmqqsMBEys7d'
+QINIU_BUCKET_NAME = 'weibar'
+QINIU_BUCKET_DOMAIN = 'res.yiwuwei.com'
 
-QINIU_BUCKET_DOMAIN2='mp.yiwuwei.com'
-QINIU_BUCKET_NAME2='attachment/'
+QINIU_BUCKET_DOMAIN2 = 'mp.yiwuwei.com'
+QINIU_BUCKET_NAME2 = 'attachment/'
 DEFAULT_FILE_STORAGE = 'ims_fa.backends.QiniuStorage'
 # MEDIA_URL = QINIU_BUCKET_DOMAIN+'/media/'
-

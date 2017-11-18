@@ -12,6 +12,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
 
 from . import models
 from . import serializers
@@ -226,3 +227,4 @@ class ConsumeRecordsViewSet(viewsets.ModelViewSet):
     filter_from = ['merchant_id__user_id']
     ordering_fields = ['consume_id']
     ordering = ['-consume_id']
+    renderer_classes = (JSONRenderer,)
