@@ -15,22 +15,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from rest_framework.routers import DefaultRouter
-from django.conf.urls import url
 from . import views
 
 router = DefaultRouter()
 router.register(r'merchants', views.MerchantsViewSet)
 router.register(r'stores', views.StoresViewSet)
-router.register(r'publish', views.PublishViewSet)
 router.register(r'tasks', views.TasksViewSet)
 router.register(r'order', views.OrderViewSet)
 router.register(r'imageup', views.ImageUpViewSet)
-router.register(r'imagesshow', views.ImagesShowViewSet)
 router.register(r'saddress', views.SaddressViewSet)
 router.register(r'consumerecords', views.ConsumeRecordsViewSet)
 
-urlpatterns = [
-    url('^task-order/(?P<pk>[0-9]+)/$', views.TaskOrderView.as_view())
-]
-
-urlpatterns += router.urls
+urlpatterns = router.urls

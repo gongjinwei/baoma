@@ -44,11 +44,18 @@ class PublishSerializer(serializers.ModelSerializer):
 
 class TasksSerializer(serializers.ModelSerializer):
     owner =serializers.ReadOnlyField(source='owner.username')
+    publish_count = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Tasks
         fields = '__all__'
         read_only_fields = ('owner',)
+
+    def get_publish_count(self,obj):
+        publishes = models.Publish.objects.filter(task_id=obj)
+        pub_surplus = sum(publishes.values_list('pub_surplus',flat=True))
+        pub_quantity = sum(publishes.values_list('pub_quantity',flat=True))
+        return dict(pub_quantity=pub_quantity,pub_surplus=pub_surplus)
 
 
 class StoresSerializer(serializers.ModelSerializer):

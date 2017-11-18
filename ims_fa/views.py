@@ -57,6 +57,17 @@ class TasksViewSet(viewsets.ModelViewSet):
         serializer = serializers.OrderSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @detail_route()
+    def publish(self, request, pk=None):
+        """
+        :param pk: for task_id
+        """
+        queryset = models.Publish.objects.filter(task_id=pk)
+        if not request.user.is_superuser:
+            queryset = queryset.filter(task_id__owner_id=request.user.id)
+        serializer = serializers.PublishSerializer(queryset, many=True)
+        return Response(serializer.data)
+
     def minus_task_fee(self):
         remaining_money=self.request.user.merchants.money_balance
         pub_quantity = int(self.request.data.get('pub_quantity',0))
@@ -110,22 +121,6 @@ class TasksViewSet(viewsets.ModelViewSet):
         serializer.save(owner=self.request.user,createtime=datetime.datetime.timestamp(time_now))
 
 
-class TaskOrderView(views.APIView):
-    """
-    输入task_id调出所有相关的订单列表
-    """
-    def get(self, request, pk, format=None):
-        """
-        :param pk: for task_id
-        """
-
-        queryset = models.Order.objects.filter(publish_id__task_id=pk)
-        if not request.user.is_superuser:
-            queryset = queryset.filter(publish_id__task_id__owner_id=request.user.id)
-        serializer = serializers.OrderSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-
 class StoresViewSet(viewsets.ModelViewSet):
     queryset = models.Stores.objects.all()
     serializer_class = serializers.StoresSerializer
@@ -146,15 +141,6 @@ class SaddressViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(merchant_id=self.request.user.merchants)
-
-
-class PublishViewSet(viewsets.ModelViewSet):
-    queryset = models.Publish.objects.all()
-    serializer_class = serializers.PublishSerializer
-    filter_backends = [filters.OrderingFilter,UserPermissionFilterBackend]
-    filter_from = ['task_id__owner_id']
-    ordering_fields =['publish_id']
-    ordering = ('-publish_id',)
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -231,15 +217,6 @@ class ImageUpViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         createtime = datetime.datetime.timestamp(datetime.datetime.now())
         serializer.save(merchant=self.request.user.merchants,createtime=createtime)
-
-
-class ImagesShowViewSet(viewsets.ModelViewSet):
-    queryset = models.ImagesShow.objects.all()
-    serializer_class = serializers.ImagesShowSerializer
-    filter_backends = [filters.OrderingFilter,UserPermissionFilterBackend]
-    filter_from = ['owner_id__publish_id__task_id__owner_id']
-    ordering_fields = ['image_id']
-    ordering = ['-image_id']
 
 
 class ConsumeRecordsViewSet(viewsets.ModelViewSet):
