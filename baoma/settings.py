@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'ims_fa',
     'corsheaders',
     'guardian',
+    'kombu.transport.django',
+    'djcelery',
 
 ]
 
@@ -169,3 +171,27 @@ QINIU_BUCKET_DOMAIN2 = 'mp.yiwuwei.com'
 QINIU_BUCKET_NAME2 = 'attachment/'
 DEFAULT_FILE_STORAGE = 'ims_fa.backends.QiniuStorage'
 # MEDIA_URL = QINIU_BUCKET_DOMAIN+'/media/'
+
+CACHES = {
+    "default":{
+        "BACKEND":"django_redis.cache.RedisCache",
+        "LOCATION":"redis://127.0.0.1:6379/1",
+        "OPTIONS":{
+            "CLIENT_CLASS":"django_redis.client.DefaultClient",
+        }
+    }
+}
+CELERY_BROKER_URL='redis://localhost/0'
+CELERY_ACCEPT_CONTENT=['json']
+CELERY_RESULT_BACKEND='redis://localhost'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+import djcelery
+djcelery.setup_loader()
+
+BROKER_URL='redis://localhost/0'
+BACKEND_URL='redis://localhost'
+
+
+CELERYBEAT_SCHEDULER='djcelery.schedulers.DatabaseScheduler'

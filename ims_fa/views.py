@@ -7,12 +7,11 @@ from decimal import Decimal
 from django.conf import settings
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status, filters, views,serializers as ser
+from rest_framework import viewsets, status, filters,serializers as ser
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
-from rest_framework.renderers import JSONRenderer
 
 from . import models
 from . import serializers
@@ -56,6 +55,7 @@ class TasksViewSet(viewsets.ModelViewSet):
         if not request.user.is_superuser:
             queryset = queryset.filter(publish_id__task_id__owner_id=request.user.id)
         serializer = serializers.OrderSerializer(queryset, many=True)
+
         return Response(serializer.data)
 
     @detail_route()
@@ -69,12 +69,14 @@ class TasksViewSet(viewsets.ModelViewSet):
         serializer = serializers.PublishSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def minus_task_fee(self):
+    def minus_task_fee(self,task_serializer):
         remaining_money=self.request.user.merchants.money_balance
-        pub_quantity = int(self.request.data.get('pub_quantity',0))
-        goods_price = Decimal(self.request.data.get('goods_price',0))
-        goods_freight=Decimal(self.request.data.get('goods_freight',0))
-        task_type=int(self.request.data.get('task_type',0))
+        pub_quantity = task_serializer.validated_data.get('pub_quantity',0)
+        if pub_quantity:
+            raise ser.ValidationError({'msg':'你的发布数量为0','status':400})
+        goods_price = task_serializer.validated_data.get('goods_price',0)
+        goods_freight=task_serializer.validated_data.get('goods_freight',0)
+        task_type=task_serializer.validated_data.get('task_type',0)
         per_publish =task_type*20+60+goods_price+goods_freight
         total_fee = pub_quantity*(per_publish)
         if remaining_money>=total_fee:
@@ -89,10 +91,10 @@ class TasksViewSet(viewsets.ModelViewSet):
         task_serializer.is_valid(raise_exception=True)
         publish_serializer.is_valid(raise_exception=True)
         if not request.user.is_superuser and task_serializer.validated_data['store_id'].merchant_id.user_id!=request.user.id:
-            raise ser.ValidationError('你不能对不属于你的店铺做任务发布')
+            raise ser.ValidationError({'msg':['你不能对不属于你的店铺做任务发布'],'status':400})
         if not request.data.get('pubs_start',''):
-            raise ser.ValidationError('请填写体验日期')
-        val,total_fee=self.minus_task_fee()
+            raise ser.ValidationError({'msg':['请填写体验日期'],'status':400})
+        val,total_fee=self.minus_task_fee(task_serializer)
         if val:
             merchant_instance = self.request.user.merchants
             merchant_instance.money_balance = merchant_instance.money_balance - total_fee
@@ -115,7 +117,7 @@ class TasksViewSet(viewsets.ModelViewSet):
             headers = self.get_success_headers(task_serializer.data)
             return Response(task_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-        return Response("你的余额不足，请充值")
+        return Response({'msg':["你的余额不足，请充值"],'status':406},status=status.HTTP_406_NOT_ACCEPTABLE)
 
     def perform_create(self, serializer):
         time_now = datetime.datetime.now()
@@ -144,7 +146,7 @@ class SaddressViewSet(viewsets.ModelViewSet):
         serializer.save(merchant_id=self.request.user.merchants)
 
 
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Order.objects.all()
     serializer_class = serializers.OrderSerializer
     filter_backends = [filters.OrderingFilter,UserPermissionFilterBackend]
@@ -156,7 +158,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     def set_comment(self,request,pk=None):
         order_instance = models.Order.objects.get(pk=int(pk))
         if not request.user.is_superuser and order_instance.publish_id.task_id.owner_id != request.user.id:
-            raise ser.ValidationError('你没有改订单的操作权限')
+            raise ser.ValidationError({'msg':'你没有改订单的操作权限','status':400})
         serializer = self.get_serializer(order_instance, data=request.data, partial=True)
         if serializer.is_valid():
             selected = request.data.get('selected',[])
@@ -186,7 +188,7 @@ class MerchantsViewSet(viewsets.ModelViewSet):
             只能新建一个商家！
         """
         if not hasattr(request.user,'merchants'):
-            raise ser.ValidationError('you can only create one merchant instance')
+            raise ser.ValidationError({'msg':'you can only create one merchant instance','status':400})
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -208,7 +210,7 @@ class ImageUpViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         if not hasattr(request.user,'merchants'):
-            raise ser.ValidationError('you must create a merchant first')
+            raise ser.ValidationError({'msg':['you must create a merchant first'],'status':400})
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -220,11 +222,10 @@ class ImageUpViewSet(viewsets.ModelViewSet):
         serializer.save(merchant=self.request.user.merchants,createtime=createtime)
 
 
-class ConsumeRecordsViewSet(viewsets.ModelViewSet):
+class ConsumeRecordsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.ConsumeRecords.objects.all()
     serializer_class = serializers.ConsumeRecordsSerializer
     filter_backends = [filters.OrderingFilter,UserPermissionFilterBackend]
     filter_from = ['merchant_id__user_id']
     ordering_fields = ['consume_id']
     ordering = ['-consume_id']
-    renderer_classes = (JSONRenderer,)
