@@ -572,6 +572,7 @@ class Tasks(models.Model):
     height_filter = models.IntegerField(default=0)
     weight_filter = models.IntegerField(default=0)
     shoe_filter = models.IntegerField(default=0)
+    is_return = models.SmallIntegerField(default=0)
     owner = models.ForeignKey(User, null=True)
 
     class Meta:
