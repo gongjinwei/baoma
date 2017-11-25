@@ -146,7 +146,7 @@ class SaddressViewSet(viewsets.ModelViewSet):
         serializer.save(merchant_id=self.request.user.merchants)
 
 
-class OrderViewSet(viewsets.ReadOnlyModelViewSet):
+class OrderViewSet(viewsets.ModelViewSet):
     queryset = models.Order.objects.all()
     serializer_class = serializers.OrderSerializer
     filter_backends = [filters.OrderingFilter,UserPermissionFilterBackend]
