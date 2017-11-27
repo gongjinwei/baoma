@@ -173,7 +173,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                     else:
                         image.is_selected=0
                         image.save()
-            serializer.save(platform_comment_images=','.join(platform_images))
+            serializer.save(platform_comment_images=','.join(platform_images),order_state=50)
             return Response(serializer.data)
 
 
