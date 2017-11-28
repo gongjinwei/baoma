@@ -5,13 +5,15 @@ from django.shortcuts import render
 import datetime
 from decimal import Decimal
 from django.conf import settings
+from django.contrib.auth.models import User
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status, filters,serializers as ser
+from rest_framework import viewsets, status, filters,serializers as ser,views
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 
 from . import models
 from . import serializers
@@ -187,17 +189,8 @@ class MerchantsViewSet(viewsets.ModelViewSet):
         """
             只能新建一个商家！
         """
-        if hasattr(request.user,'merchants'):
-            raise ser.ValidationError({'msg':'you can only create one merchant instance','status':400})
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    def perform_create(self, serializer):
-        createtime = datetime.datetime.timestamp(datetime.datetime.now())
-        serializer.save(user=self.request.user,createtime=createtime)
+        raise ser.ValidationError({'msg':"you can't create in this way,please create it from register",'status':400})
 
 
 class ImageUpViewSet(viewsets.ModelViewSet):
@@ -229,3 +222,19 @@ class ConsumeRecordsViewSet(viewsets.ReadOnlyModelViewSet):
     filter_from = ['merchant_id__user_id']
     ordering_fields = ['consume_id']
     ordering = ['-consume_id']
+
+
+class RegisterView(views.APIView):
+    permission_classes = [AllowAny]
+
+    def post(self,request):
+        user_serializer = serializers.UserSerializer(data=request.data)
+        password = request.data.get('password','')
+        serializer = serializers.MerchantsSerializer(data=request.data)
+        if password and user_serializer.is_valid(raise_exception=True) and serializer.is_valid(raise_exception=True):
+            user=user_serializer.save(is_active=True)
+            user.set_password(password)
+            user.save()
+            createtime = datetime.datetime.timestamp(datetime.datetime.now())
+            serializer.save(user=user, createtime=createtime)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)

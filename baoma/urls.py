@@ -22,11 +22,14 @@ from django.views.static import serve
 from django.views.generic.base import RedirectView
 from .settings import MEDIA_ROOT ,STATIC_ROOT
 
+from ims_fa.views import RegisterView
+
 urlpatterns = [
     url(r'^admin/',admin.site.urls),
     url(r'^api-token-auth/$',ObtainExpireAuthToken.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api/',include('ims_fa.urls',namespace='api')),
+    url(r'^api-register/$',RegisterView.as_view(),name='register'),
     # url(r'^media/(?P<path>.*$)',serve,{'document_root': MEDIA_ROOT}),
     # url(r'^static/(?P<path>.*$)',serve,{'document_root': STATIC_ROOT}),
     url(r'^docs/',include_docs_urls(title='BaoMa API')),

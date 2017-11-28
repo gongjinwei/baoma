@@ -3,6 +3,7 @@ from rest_framework import serializers
 from . import models
 import uuid
 
+from django.contrib.auth.models import User
 
 class UUIDImageField(serializers.ImageField):
     def to_internal_value(self, data):
@@ -80,7 +81,7 @@ class MerchantsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Merchants
-        exclude = ['password', ]
+        exclude = ['password', 'salt']
 
 
 class PageSerializer(serializers.ModelSerializer):
@@ -104,3 +105,8 @@ class ConsumeRecordsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ConsumeRecords
         fields = '__all__'
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields=['username']
