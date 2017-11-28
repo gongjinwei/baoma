@@ -78,6 +78,7 @@ class SaddressSerializer(serializers.ModelSerializer):
 class MerchantsSerializer(serializers.ModelSerializer):
     stores = serializers.StringRelatedField(many=True, read_only=True)
     user = serializers.ReadOnlyField(source='user.id')
+    email = serializers.ReadOnlyField(source='user.email')
 
     class Meta:
         model = models.Merchants
@@ -109,4 +110,4 @@ class ConsumeRecordsSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields=['username']
+        fields=['username','email']
