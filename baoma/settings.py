@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'guardian',
     'kombu.transport.django',
     'djcelery',
+    'rest_pandas',
+    'authadmin',
 
 ]
 
@@ -74,6 +76,10 @@ TEMPLATES = [
             ],
         },
     },
+    {
+        'BACKEND': 'django_mustache.Mustache',
+        'APP_DIRS': True,
+    }
 ]
 
 WSGI_APPLICATION = 'baoma.wsgi.application'

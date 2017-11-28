@@ -1,23 +1,37 @@
-# -*- coding:UTF-8 -*-
-"""URL Configuration
+from django.conf.urls import include, url
+from rest_framework.routers import DefaultRouter
+from rest_framework.urlpatterns import format_suffix_patterns
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/1.11/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.conf.urls import url, include
-    2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
-"""
-from rest_framework import routers
+from .views import (
+    NoModelView, FromFileView, TimeSeriesView, TimeSeriesNoIdView,
+    TimeSeriesMixedRendererView, TimeSeriesMixinView, TimeSeriesNoMixinView,
+    DjangoPandasView, TimeSeriesViewSet,
+    MultiTimeSeriesView, MultiScatterView, MultiBoxplotView,
+    ComplexTimeSeriesView, ComplexScatterView, ComplexBoxplotView,
+    CustomIndexSeriesView,
+)
 
-from . import views
+router = DefaultRouter()
+router.register('timeseries', TimeSeriesViewSet)
 
-user_router = routers.DefaultRouter()
-user_router.register(r'users',views.UserViewSet)
-user_router.register(r'groups',views.GroupViewSet)
+urlpatterns = [
+    url(r'^nomodel$', NoModelView.as_view()),
+    url(r'^fromfile$', FromFileView.as_view()),
+    url(r'^timeseries$', TimeSeriesView.as_view()),
+    url(r'^timeseriesnoid$', TimeSeriesNoIdView.as_view()),
+    url(r'^mixedrenderers$', TimeSeriesMixedRendererView.as_view()),
+    url(r'^mixin$', TimeSeriesMixinView.as_view()),
+    url(r'^nomixin$', TimeSeriesNoMixinView.as_view()),
+    url(r'^djangopandas$', DjangoPandasView.as_view()),
+    url(r'^multitimeseries$', MultiTimeSeriesView.as_view()),
+    url(r'^multiscatter$', MultiScatterView.as_view()),
+    url(r'^multiboxplot$', MultiBoxplotView.as_view()),
+    url(r'^complextimeseries$', ComplexTimeSeriesView.as_view()),
+    url(r'^complexscatter$', ComplexScatterView.as_view()),
+    url(r'^complexboxplot$', ComplexBoxplotView.as_view()),
+    url(r'^customindex$', CustomIndexSeriesView.as_view()),
+]
+urlpatterns = format_suffix_patterns(urlpatterns)
+urlpatterns += [
+    url(r'^router/', include(router.urls)),
+]
