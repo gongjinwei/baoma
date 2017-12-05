@@ -72,7 +72,13 @@ class TasksViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def minus_task_fee(self,task_serializer):
-        remaining_money=self.request.user.merchants.money_balance
+        merchant =self.request.user.merchants
+        remaining_money=merchant.money_balance
+        discount = merchant.level.discount
+        if not discount:
+            discount = 1
+        else:
+            discount = discount/100
         pub_quantity = task_serializer.validated_data.get('pub_quantity',0)
         if pub_quantity:
             raise ser.ValidationError({'msg':'你的发布数量为0','status':400})
@@ -80,7 +86,7 @@ class TasksViewSet(viewsets.ModelViewSet):
         goods_freight=task_serializer.validated_data.get('goods_freight',0)
         task_type=task_serializer.validated_data.get('task_type',0)
         per_publish =task_type*20+60+goods_price+goods_freight
-        total_fee = pub_quantity*(per_publish)
+        total_fee = pub_quantity*(per_publish)*discount
         if remaining_money>=total_fee:
             return (True,total_fee)
         return (False,0)

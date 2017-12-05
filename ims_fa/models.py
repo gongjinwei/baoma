@@ -380,7 +380,7 @@ pre_save.connect(create_records,Merchants)
 class MerchantLevel(models.Model):
     level_id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50)
-    discount = models.SmallIntegerField(default=0)
+    discount = models.SmallIntegerField(default=100)
     store_num = models.SmallIntegerField(default=0)
     sort = models.IntegerField(default=0)
     createtime = models.IntegerField(default=0)
@@ -588,6 +588,10 @@ class Tasks(models.Model):
     shoe_filter = models.IntegerField(default=0)
     is_return = models.SmallIntegerField(default=0)
     owner = models.ForeignKey(User, null=True)
+    more_comment_filter=models.SmallIntegerField(default=0)
+    more_comment_attention=models.TextField()
+    video_comment_filter=models.SmallIntegerField(default=0)
+    video_comment_attention=models.TextField()
 
     class Meta:
         managed = False
