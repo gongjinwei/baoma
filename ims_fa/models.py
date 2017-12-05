@@ -355,8 +355,9 @@ class Merchants(models.Model):
     qq = models.CharField(max_length=15,default='')
     realname = models.CharField(max_length=10)
     own_shop = models.IntegerField(editable=False,default=0)
-    merchant_state = models.IntegerField(editable=False,default=0)
+    merchant_state = models.IntegerField(editable=False,default=10)
     money_balance = models.DecimalField(max_digits=10, decimal_places=2,default=0,editable=False)
+    level = models.ForeignKey('MerchantLevel',default=1)
     createtime = models.IntegerField(editable=False)
     updatetime = models.IntegerField(editable=False)
     user = models.OneToOneField(User,editable=False,null=True)
@@ -374,6 +375,19 @@ class Merchants(models.Model):
 
 
 pre_save.connect(create_records,Merchants)
+
+
+class MerchantLevel(models.Model):
+    level_id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=50)
+    discount = models.SmallIntegerField(default=0)
+    store_num = models.SmallIntegerField(default=0)
+    sort = models.IntegerField(default=0)
+    createtime = models.IntegerField(default=0)
+
+    class Meta:
+        managed = False
+        db_table='ims_fa_merchant_level'
 
 
 class Models(models.Model):

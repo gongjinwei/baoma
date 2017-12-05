@@ -75,10 +75,18 @@ class SaddressSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class MerchantLevelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.MerchantLevel
+        fields = '__all__'
+
+
 class MerchantsSerializer(serializers.ModelSerializer):
     stores = serializers.StringRelatedField(many=True, read_only=True)
     user = serializers.ReadOnlyField(source='user.id')
     email = serializers.ReadOnlyField(source='user.email')
+    level = MerchantLevelSerializer(read_only=True)
 
     class Meta:
         model = models.Merchants
@@ -106,6 +114,7 @@ class ConsumeRecordsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ConsumeRecords
         fields = '__all__'
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

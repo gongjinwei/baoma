@@ -216,6 +216,7 @@ class ImageUpViewSet(viewsets.ModelViewSet):
 
 
 class ConsumeRecordsViewSet(viewsets.ReadOnlyModelViewSet):
+
     queryset = models.ConsumeRecords.objects.all()
     serializer_class = serializers.ConsumeRecordsSerializer
     filter_backends = [filters.OrderingFilter,UserPermissionFilterBackend]
