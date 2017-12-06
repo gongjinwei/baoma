@@ -227,6 +227,15 @@ class ConsumeRecordsViewSet(viewsets.ReadOnlyModelViewSet):
     ordering = ['-consume_id']
 
 
+class MerchantRechargeViewSet(viewsets.ModelViewSet):
+    queryset = models.MerchantRecharge.objects.all()
+    serializer_class = serializers.MerchantRechargeSerializer
+    filter_backends = [filters.OrderingFilter,UserPermissionFilterBackend]
+    filter_from = ['merchant_id__user_id']
+    ordering_fields = ['recharge_id']
+    ordering = ['-recharge_id']
+
+
 class RegisterView(views.APIView):
     permission_classes = [AllowAny]
 

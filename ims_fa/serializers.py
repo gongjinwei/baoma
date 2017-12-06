@@ -120,3 +120,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields=['username','email']
+
+
+class MerchantRechargeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.MerchantRecharge
+        fields='__all__'

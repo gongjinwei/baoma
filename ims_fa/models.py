@@ -517,7 +517,7 @@ class Stores(models.Model):
     merchant_id = models.ForeignKey('Merchants', db_column='merchant_id', related_name='stores',editable=False)
     store_platform = models.IntegerField(default=0)
     store_name = models.CharField(max_length=45,default='')
-    store_url = models.CharField(max_length=45,default='')
+    store_url = models.CharField(max_length=255,default='')
     store_state = models.IntegerField(default=0,editable=False)
     createtime = models.IntegerField(editable=False)
 
@@ -589,9 +589,9 @@ class Tasks(models.Model):
     is_return = models.SmallIntegerField(default=0)
     owner = models.ForeignKey(User, null=True)
     more_comment_filter=models.SmallIntegerField(default=0)
-    more_comment_attention=models.TextField()
+    more_comment_attention=models.TextField(default='')
     video_comment_filter=models.SmallIntegerField(default=0)
-    video_comment_attention=models.TextField()
+    video_comment_attention=models.TextField(default='')
 
     class Meta:
         managed = False
@@ -619,6 +619,9 @@ class ImageUp(models.Model):
     merchant=models.ForeignKey('Merchants',on_delete=models.DO_NOTHING,editable=False,null=True)
     createtime=models.IntegerField(editable=False)
 
+    class Meta:
+        managed = False
+
 
 class ConsumeRecords(models.Model):
     consume_id = models.AutoField(primary_key=True)
@@ -636,3 +639,23 @@ class ConsumeRecords(models.Model):
     class Meta:
         managed = False
         db_table = 'ims_fa_consume_records'
+
+
+class MerchantRecharge(models.Model):
+    recharge_id = models.AutoField(primary_key=True)
+    merchant = models.ForeignKey('Merchants')
+    realname=models.CharField(max_length=45,default='')
+    mobile = models.CharField(max_length=45,default='')
+    pay_type=models.SmallIntegerField(default=0)
+    order_num=models.CharField(max_length=45,default='')
+    amount = models.DecimalField(max_digits=8,decimal_places=2,default=0.00)
+    voucher_image=models.CharField(max_length=255,default='')
+    remark = models.CharField(max_length=45,default='')
+    operator_id=models.IntegerField(default=0)
+    createtime=models.IntegerField(editable=False)
+    operator_name =models.CharField(max_length=55,default='')
+
+
+    class Meta:
+        managed = False
+        db_table = 'ims_fa_merchant_recharge'
