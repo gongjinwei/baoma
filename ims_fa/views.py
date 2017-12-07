@@ -235,6 +235,19 @@ class MerchantRechargeViewSet(viewsets.ModelViewSet):
     ordering_fields = ['recharge_id']
     ordering = ['-recharge_id']
 
+    def create(self, request, *args, **kwargs):
+        if not hasattr(request.user,'merchants'):
+            raise ser.ValidationError({'msg':['you must create a merchant first'],'status':400})
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        createtime = datetime.datetime.timestamp(datetime.datetime.now())
+        serializer.save(merchant=self.request.user.merchants,createtime=createtime)
+
 
 class RegisterView(views.APIView):
     permission_classes = [AllowAny]

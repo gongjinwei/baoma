@@ -358,6 +358,7 @@ class Merchants(models.Model):
     merchant_state = models.IntegerField(editable=False,default=10)
     money_balance = models.DecimalField(max_digits=10, decimal_places=2,default=0,editable=False)
     level = models.ForeignKey('MerchantLevel',default=1)
+    referee_id = models.IntegerField(default=0)
     createtime = models.IntegerField(editable=False)
     updatetime = models.IntegerField(editable=False)
     user = models.OneToOneField(User,editable=False,null=True)

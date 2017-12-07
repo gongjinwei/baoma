@@ -123,6 +123,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class MerchantRechargeSerializer(serializers.ModelSerializer):
+    merchant = serializers.ReadOnlyField(source='merchant.merchant_id')
+
     class Meta:
         model = models.MerchantRecharge
         fields='__all__'
