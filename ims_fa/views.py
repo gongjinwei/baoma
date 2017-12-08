@@ -6,6 +6,7 @@ import datetime
 from decimal import Decimal
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, filters,serializers as ser,views
@@ -193,6 +194,24 @@ class MerchantsViewSet(viewsets.ModelViewSet):
         """
 
         raise ser.ValidationError({'msg':"you can't create in this way,please create it from register",'status':400})
+
+    @detail_route(methods=['post'])
+    def set_password(self,request,pk=None):
+        old_password = request.data.get('old_password', '')
+        new_password=request.data.get('new_password', '')
+        if old_password and new_password and old_password !=new_password:
+            user_login = User.objects.get(username=request.user)
+            if user_login.check_password(old_password):
+                merchant = models.Merchants.objects.get(pk=int(pk))
+                user_change = merchant.user
+                if user_login.is_superuser or user_change==user_login:
+                    user_change.password=make_password(new_password)
+                    user_change.save()
+                    return Response('Password is set done')
+                return Response("No permission to do this", status=status.HTTP_400_BAD_REQUEST)
+            return Response("password is wrong", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("password can't be null and the same",status=status.HTTP_400_BAD_REQUEST)
 
 
 class ImageUpViewSet(viewsets.ModelViewSet):
