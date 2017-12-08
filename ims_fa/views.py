@@ -71,18 +71,18 @@ class TasksViewSet(viewsets.ModelViewSet):
         serializer = serializers.PublishSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def minus_task_fee(self,task_serializer):
+    def minus_task_fee(self,task_serializer,publish_serializer):
         merchant =self.request.user.merchants
         remaining_money=merchant.money_balance
         discount = merchant.level.discount/100 if hasattr(merchant.level,'discount') else 1
-        pub_quantity = task_serializer.validated_data.get('pub_quantity',0)
-        if pub_quantity:
+        pub_quantity = publish_serializer.validated_data.get('pub_quantity',0)
+        if pub_quantity==0:
             raise ser.ValidationError({'msg':'你的发布数量为0','status':400})
         goods_price = task_serializer.validated_data.get('goods_price',0)
         goods_freight=task_serializer.validated_data.get('goods_freight',0)
         task_type=task_serializer.validated_data.get('task_type',0)
         per_publish =task_type*20+60+goods_price+goods_freight
-        total_fee = pub_quantity*(per_publish)*discount
+        total_fee = pub_quantity*(per_publish)*Decimal(discount)
         if remaining_money>=total_fee:
             return (True,total_fee)
         return (False,0)
@@ -98,7 +98,7 @@ class TasksViewSet(viewsets.ModelViewSet):
             raise ser.ValidationError({'msg':['你不能对不属于你的店铺做任务发布'],'status':400})
         if not request.data.get('pubs_start',''):
             raise ser.ValidationError({'msg':['请填写体验日期'],'status':400})
-        val,total_fee=self.minus_task_fee(task_serializer)
+        val,total_fee=self.minus_task_fee(task_serializer,publish_serializer)
         if val:
             merchant_instance = self.request.user.merchants
             merchant_instance.money_balance = merchant_instance.money_balance - total_fee

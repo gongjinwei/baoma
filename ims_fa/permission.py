@@ -7,6 +7,7 @@ import operator
 from django.db import models
 from functools import reduce
 from django.core.cache import cache
+from decimal import Decimal
 
 from datetime import datetime
 
@@ -127,13 +128,13 @@ def create_records(sender, instance, created=False, *args, **kwargs):
             records.merchant_name=instance.realname
             records.pay_type = 2
             if before_minus>instance.money_balance:
-                records.income = 0
+                records.income = Decimal('0.00')
                 records.expense=before_minus-instance.money_balance
                 records.remark='发单扣款'
             else:
                 income =instance.money_balance-before_minus
                 records.income = income
-                records.expense = 0
+                records.expense = Decimal('0.00')
                 records.remark = '充值 %s' % income
             records.balance = instance.money_balance
             records.createtime=datetime.timestamp(datetime.now())
