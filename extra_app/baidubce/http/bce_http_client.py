@@ -15,7 +15,7 @@ This module provide http request function for bce services.
 """
 
 import logging
-from http import client as httplib
+import http.client as httplib
 import sys
 import time
 import traceback

@@ -2,11 +2,13 @@
 from django.shortcuts import render
 
 # Create your views here.
-import datetime
+import datetime,re
 from decimal import Decimal
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
+from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, filters,serializers as ser,views
@@ -19,6 +21,7 @@ from rest_framework.permissions import AllowAny
 from . import models
 from . import serializers
 from .permission import UserPermissionFilterBackend
+from .SmsClient import SmsSender
 
 
 class ObtainExpireAuthToken(ObtainAuthToken):
@@ -196,7 +199,7 @@ class MerchantsViewSet(viewsets.ModelViewSet):
         raise ser.ValidationError({'msg':"you can't create in this way,please create it from register",'status':400})
 
     @detail_route(methods=['post'])
-    def set_password(self,request,pk=None):
+    def reset_password(self,request,pk=None):
         old_password = request.data.get('old_password', '')
         new_password=request.data.get('new_password', '')
         if old_password and new_password and old_password !=new_password:
@@ -212,6 +215,31 @@ class MerchantsViewSet(viewsets.ModelViewSet):
             return Response("password is wrong", status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response("password can't be null and the same",status=status.HTTP_400_BAD_REQUEST)
+
+    @detail_route(methods=['post'])
+    def set_password(self,request,pk=None):
+        mobile = request.data.get('mobile','')
+        code_recv = request.data.get('code','')
+        merchant = models.Merchants.objects.get(mobile=mobile)
+        password = request.data.get('password','')
+        if merchant and password and code_recv:
+            sender = SmsSender(mobile)
+            code = sender.send()
+            if code ==400:
+                return Response('请在一分钟之后再试')
+            elif code != 400 | 1000:
+                return Response('系统忙！')
+            else:
+                code_cache = cache.get(mobile+'_code_str')
+                if code_cache == code_recv:
+                    user = merchant.user
+                    user.password = make_password(password)
+                    user.save()
+                    return Response('设置成功')
+                else:
+                    return Response('验证码错误')
+        else:
+            return Response('不存在此电话号码')
 
 
 class ImageUpViewSet(viewsets.ModelViewSet):
@@ -272,13 +300,65 @@ class RegisterView(views.APIView):
     permission_classes = [AllowAny]
 
     def post(self,request):
-        user_serializer = serializers.UserSerializer(data=request.data)
-        password = request.data.get('password','')
-        serializer = serializers.MerchantsSerializer(data=request.data)
-        if password and user_serializer.is_valid(raise_exception=True) and serializer.is_valid(raise_exception=True):
-            user=user_serializer.save(is_active=True)
-            user.set_password(password)
+        mobile_recv = request.data.get('mobile', '')
+        register_code = request.data.get('code', '')
+        mobile_cache = cache.get(register_code + 'register' + '_mobile')
+        if mobile_recv==mobile_cache:
+            user_serializer = serializers.UserSerializer(data=request.data)
+            password = request.data.get('password','')
+            serializer = serializers.MerchantsSerializer(data=request.data)
+            if password and user_serializer.is_valid(raise_exception=True) and serializer.is_valid(raise_exception=True):
+                user=user_serializer.save(is_active=True)
+                user.set_password(password)
+                user.is_active=True
+                user.save()
+                createtime = datetime.datetime.timestamp(datetime.datetime.now())
+                serializer.save(user=user, createtime=createtime)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response('验证码错误或已失效')
+
+    def put(self,request):
+        mobile = request.data.get('mobile', '')
+        matcher = re.match('^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(18[0,5-9]))\\d{8}$', mobile)
+        if not matcher:
+            return Response('你输入的手机号码有误')
+        sender = SmsSender(mobile)
+        code, msg = sender.send(type='register')
+        return Response(msg)
+
+
+class ResetSendView(views.APIView):
+    permission_classes = [AllowAny]
+
+    def post(self,request):
+        mobile = request.data.get('mobile','')
+        try:
+            models.Merchants.objects.get(mobile=mobile)
+        except ObjectDoesNotExist:
+            return Response('不存在此电话号码')
+        sender = SmsSender(mobile)
+        code,msg = sender.send(type='reset')
+        return Response(msg)
+
+
+class PasswordResetView(views.APIView):
+    permission_classes = [AllowAny]
+
+    def post(self,request):
+        mobile_recv = request.data.get('mobile','')
+        matcher = re.match('^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(18[0,5-9]))\\d{8}$', mobile_recv)
+        if not matcher:
+            return Response('你输入的手机号码有误')
+        code = request.data.get('code','')
+        password = request.data.get('new_password','')
+        mobile_cache=cache.get(code+'reset'+'_mobile')
+        if mobile_cache==mobile_recv:
+            merchant = models.Merchants.objects.get(mobile=mobile_recv)
+            user = merchant.user
+            user.password = make_password(password)
             user.save()
-            createtime = datetime.datetime.timestamp(datetime.datetime.now())
-            serializer.save(user=user, createtime=createtime)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            cache.delete(code+'reset'+'_mobile')
+            return Response('设置成功')
+        else:
+            return Response('验证码不正确或已失效')

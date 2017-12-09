@@ -348,7 +348,7 @@ class Members(models.Model):
 
 class Merchants(models.Model):
     merchant_id = models.AutoField(primary_key=True)
-    mobile = models.CharField(max_length=11)
+    mobile = models.CharField(max_length=11,unique=True)
     password = models.CharField(max_length=32,default='')
     salt = models.CharField(max_length=8,default='')
     wechat = models.CharField(max_length=30,default='')
@@ -658,7 +658,6 @@ class MerchantRecharge(models.Model):
     operator_id=models.IntegerField(default=0)
     createtime=models.IntegerField(editable=False)
     operator_name =models.CharField(max_length=55,default='')
-
 
     class Meta:
         managed = False
