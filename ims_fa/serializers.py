@@ -145,11 +145,10 @@ def code_validator(value):
 
 class MerchantRegisterSerializer(serializers.ModelSerializer):
     mobile = serializers.CharField(required=True, validators=[mobile_validator],
-                                   help_text='11位手机号，符号手机号规则，不能与注册手机重复')
+                                   help_text='11位手机号，作为用户名登录。必须符号手机号规则，不能与注册手机重复')
     code = serializers.CharField(required=True, validators=[code_validator], help_text='6位数字短信验证码')
     password = serializers.CharField(required=True, min_length=5, help_text='密码，不少于5位',
                                      style={'input_type': 'password'})
-    username = serializers.CharField(required=True, source='user.username', help_text='登录用户名')
     email = serializers.EmailField(required=True, source='user.email', help_text='邮箱')
 
     class Meta:

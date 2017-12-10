@@ -262,7 +262,7 @@ class MerchantRechargeViewSet(viewsets.ModelViewSet):
 
 class RegisterView(GenericAPIView):
     """
-        先创建用户，后创建商家
+        先创建用户，后创建商家。登录用户名与手机号相同
     """
     permission_classes = [AllowAny]
     serializer_class = serializers.MerchantRegisterSerializer
@@ -276,17 +276,15 @@ class RegisterView(GenericAPIView):
 
             mobile_cache = cache.get(register_code + 'register' + '_mobile')
             if mobile_recv == mobile_cache:
-                user_serializer = serializers.UserSerializer(data=serializer.validated_data['user'])
-                if user_serializer.is_valid(raise_exception=True):
-                    user = user_serializer.save(is_active=True)
-                    merchant_serializer = serializers.MerchantsSerializer(data=serializer.validated_data)
-                    if merchant_serializer.is_valid(
-                            raise_exception=True):
-                        user.set_password(password)
-                        user.save()
-                        createtime = datetime.datetime.timestamp(datetime.datetime.now())
-                        merchant_serializer.save(user=user, createtime=createtime)
-                        return Response(merchant_serializer.data, status=status.HTTP_201_CREATED)
+                user = User(username=mobile_recv,email=serializer.validated_data['user']['email'],is_active=True)
+                user.set_password(password)
+                user.save()
+                merchant_serializer = serializers.MerchantsSerializer(data=serializer.validated_data)
+                if merchant_serializer.is_valid(
+                        raise_exception=True):
+                    createtime = datetime.datetime.timestamp(datetime.datetime.now())
+                    merchant_serializer.save(user=user, createtime=createtime)
+                    return Response(merchant_serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return Response('验证码错误或已失效')
 
