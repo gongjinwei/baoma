@@ -94,8 +94,6 @@ class TasksViewSet(viewsets.ModelViewSet):
         return (False, 0)
 
     def create(self, request, *args, **kwargs):
-        if not hasattr(request.user, 'merchants'):
-            raise ser.ValidationError('you must create a merchant first')
         task_serializer = self.get_serializer(data=request.data)
         publish_serializer = serializers.PublishSerializer(data=request.data)
         task_serializer.is_valid(raise_exception=True)
@@ -230,15 +228,6 @@ class ImageUpViewSet(viewsets.ModelViewSet):
     ordering_fields = ['id']
     ordering = ['-id']
 
-    def create(self, request, *args, **kwargs):
-        if not hasattr(request.user, 'merchants'):
-            raise ser.ValidationError({'msg': ['you must create a merchant first'], 'status': 400})
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
     def perform_create(self, serializer):
         createtime = datetime.datetime.timestamp(datetime.datetime.now())
         serializer.save(merchant=self.request.user.merchants, createtime=createtime)
@@ -260,15 +249,6 @@ class MerchantRechargeViewSet(viewsets.ModelViewSet):
     filter_from = ['merchant_id__user_id']
     ordering_fields = ['recharge_id']
     ordering = ['-recharge_id']
-
-    def create(self, request, *args, **kwargs):
-        if not hasattr(request.user, 'merchants'):
-            raise ser.ValidationError({'msg': ['you must create a merchant first'], 'status': 400})
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         createtime = datetime.datetime.timestamp(datetime.datetime.now())
@@ -326,9 +306,6 @@ class ForgetSendView(views.APIView):
 
 
 class PasswordForgetView(views.APIView):
-    """
-
-    """
     permission_classes = [AllowAny]
 
     def post(self, request):

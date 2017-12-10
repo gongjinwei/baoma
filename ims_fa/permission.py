@@ -3,10 +3,10 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from rest_framework.permissions import BasePermission
 from rest_framework.filters import BaseFilterBackend
+from rest_framework.exceptions import ValidationError
 import operator
 from django.db import models
 from functools import reduce
-from django.core.cache import cache
 from decimal import Decimal
 
 from datetime import datetime
@@ -53,6 +53,9 @@ class UserPermissionFilterBackend(BaseFilterBackend):
         user = request.user
         if user.is_superuser:
             return queryset
+        if queryset.model._meta.model_name != 'merchants':
+            if not hasattr(request.user,'merchants'):
+                raise ValidationError('you must create merchant first')
         assert view.filter_from is not None,"view hasn't attribute `filter_from`"
         assert isinstance(view.filter_from,list),"filter_from must be a list"
         filter_from = getattr(view, 'filter_from')
