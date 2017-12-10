@@ -24,7 +24,10 @@ from .permission import UserPermissionFilterBackend
 from .SmsClient import SmsSender
 
 
-class ObtainExpireAuthToken(ObtainAuthToken):
+class ObtainExpireAuthToken(ObtainAuthToken,GenericAPIView):
+    """"
+        输入用户名和密码来获取Token,请求头带上Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b
+    """
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
