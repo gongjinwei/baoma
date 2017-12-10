@@ -143,12 +143,12 @@ def code_validator(value):
 
 
 class MobileSerializer(serializers.Serializer):
-    mobile = serializers.CharField(required=True, validators=[mobile_validator])
+    mobile = serializers.CharField(required=True, validators=[mobile_validator],help_text='11位手机号，符号手机号规则')
 
 
 class PasswordSetSerializer(MobileSerializer):
-    code = serializers.CharField(required=True, validators=[code_validator])
-    password = serializers.CharField(required=True, min_length=5)
+    code = serializers.CharField(required=True, validators=[code_validator],help_text='6位数字短信验证码')
+    password = serializers.CharField(required=True, min_length=5,help_text='密码，不少于5位')
 
 
 class PasswordResetSerializer(serializers.Serializer):

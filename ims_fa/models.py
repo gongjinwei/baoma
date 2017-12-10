@@ -348,12 +348,12 @@ class Members(models.Model):
 
 class Merchants(models.Model):
     merchant_id = models.AutoField(primary_key=True)
-    mobile = models.CharField(max_length=11,unique=True)
+    mobile = models.CharField(max_length=11,unique=True,help_text='手机号')
     password = models.CharField(max_length=32,default='')
     salt = models.CharField(max_length=8,default='')
-    wechat = models.CharField(max_length=30,default='')
-    qq = models.CharField(max_length=15,default='')
-    realname = models.CharField(max_length=10)
+    wechat = models.CharField(max_length=30,default='',help_text='微信号')
+    qq = models.CharField(max_length=15,default='',help_text='QQ号')
+    realname = models.CharField(max_length=10,help_text='真实姓名')
     own_shop = models.IntegerField(editable=False,default=0)
     merchant_state = models.IntegerField(editable=False,default=10)
     money_balance = models.DecimalField(max_digits=10, decimal_places=2,default=0,editable=False)

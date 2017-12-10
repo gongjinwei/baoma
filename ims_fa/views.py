@@ -259,7 +259,7 @@ class MerchantRechargeViewSet(viewsets.ModelViewSet):
 
 class RegisterView(GenericAPIView):
     permission_classes = [AllowAny]
-    serializer_class = serializers.PasswordSetSerializer
+    serializer_class = serializers.MerchantsSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -285,6 +285,9 @@ class RegisterView(GenericAPIView):
 
 
 class RegisterSendView(GenericAPIView):
+    """
+        发送注册的手机验证码
+    """
     permission_classes = [AllowAny]
     serializer_class=serializers.MobileSerializer
 
@@ -298,6 +301,9 @@ class RegisterSendView(GenericAPIView):
 
 
 class ForgetSendView(GenericAPIView):
+    """
+        发送密码重置的手机验证码
+    """
     permission_classes = [AllowAny]
     serializer_class=serializers.MobileSerializer
 
@@ -315,6 +321,9 @@ class ForgetSendView(GenericAPIView):
 
 
 class PasswordForgetView(GenericAPIView):
+    """
+        忘记密码后的重置操作，需要提供重置的手机号，有效验证码及新密码
+    """
     serializer_class = serializers.PasswordSetSerializer
     permission_classes = [AllowAny]
 
