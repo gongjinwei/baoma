@@ -8,7 +8,6 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
-from django.core.exceptions import ObjectDoesNotExist
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, filters, serializers as ser
@@ -23,8 +22,6 @@ from . import models
 from . import serializers
 from .permission import UserPermissionFilterBackend
 from .SmsClient import SmsSender
-
-import coreapi, coreschema
 
 
 class ObtainExpireAuthToken(ObtainAuthToken):
@@ -201,9 +198,12 @@ class MerchantsViewSet(viewsets.ModelViewSet):
 
         raise ser.ValidationError({'msg': "you can't create in this way,please create it from register", 'status': 400})
 
-    @detail_route(methods=['post'])
+    @detail_route(methods=['post'],serializer_class=serializers.PasswordResetSerializer)
     def password_reset(self, request, pk=None):
-        password_serializer = serializers.PasswordResetSerializer(data=request.data)
+        """
+            输入旧密码，改成新密码
+        """
+        password_serializer = self.get_serializer(data=request.data)
         if password_serializer.is_valid(raise_exception=True):
             old_password = password_serializer.validated_data['old_password']
             new_password = password_serializer.validated_data['new_password']
@@ -259,7 +259,7 @@ class MerchantRechargeViewSet(viewsets.ModelViewSet):
 
 class RegisterView(GenericAPIView):
     permission_classes = [AllowAny]
-    serializer_class = serializers.MerchantsSerializer
+    serializer_class = serializers.MerchantRegisterSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -270,16 +270,17 @@ class RegisterView(GenericAPIView):
 
             mobile_cache = cache.get(register_code + 'register' + '_mobile')
             if mobile_recv == mobile_cache:
-                user_serializer = serializers.UserSerializer(data=request.data)
-                merchant_serializer = serializers.MerchantsSerializer(data=request.data)
-                if password and user_serializer.is_valid(raise_exception=True) and merchant_serializer.is_valid(
-                        raise_exception=True):
+                user_serializer = serializers.UserSerializer(data=serializer.validated_data['user'])
+                if user_serializer.is_valid(raise_exception=True):
                     user = user_serializer.save(is_active=True)
-                    user.set_password(password)
-                    user.save()
-                    createtime = datetime.datetime.timestamp(datetime.datetime.now())
-                    merchant_serializer.save(user=user, createtime=createtime)
-                    return Response(merchant_serializer.data, status=status.HTTP_201_CREATED)
+                    merchant_serializer = serializers.MerchantsSerializer(data=serializer.validated_data)
+                    if merchant_serializer.is_valid(
+                            raise_exception=True):
+                        user.set_password(password)
+                        user.save()
+                        createtime = datetime.datetime.timestamp(datetime.datetime.now())
+                        merchant_serializer.save(user=user, createtime=createtime)
+                        return Response(merchant_serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return Response('验证码错误或已失效')
 
@@ -289,7 +290,7 @@ class RegisterSendView(GenericAPIView):
         发送注册的手机验证码
     """
     permission_classes = [AllowAny]
-    serializer_class=serializers.MobileSerializer
+    serializer_class=serializers.RegisterMobileSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -305,19 +306,18 @@ class ForgetSendView(GenericAPIView):
         发送密码重置的手机验证码
     """
     permission_classes = [AllowAny]
-    serializer_class=serializers.MobileSerializer
+    serializer_class=serializers.ForgetMobileSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             mobile = serializer.validated_data['mobile']
-            try:
-                models.Merchants.objects.get(mobile=mobile)
-            except ObjectDoesNotExist:
+            if models.Merchants.objects.filter(mobile=mobile).exists():
+                sender = SmsSender(mobile)
+                code, msg = sender.send(type='forget')
+                return Response(msg)
+            else:
                 return Response('不存在此电话号码')
-            sender = SmsSender(mobile)
-            code, msg = sender.send(type='forget')
-            return Response(msg)
 
 
 class PasswordForgetView(GenericAPIView):

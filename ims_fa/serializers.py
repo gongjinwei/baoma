@@ -1,5 +1,6 @@
 # -*- coding:UTF-8 -*-
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from . import models
 import uuid, re
 
@@ -142,15 +143,39 @@ def code_validator(value):
         raise serializers.ValidationError('验证码不正确')
 
 
-class MobileSerializer(serializers.Serializer):
-    mobile = serializers.CharField(required=True, validators=[mobile_validator],help_text='11位手机号，符号手机号规则')
+class MerchantRegisterSerializer(serializers.ModelSerializer):
+    mobile = serializers.CharField(required=True, validators=[mobile_validator],
+                                   help_text='11位手机号，符号手机号规则，不能与注册手机重复')
+    code = serializers.CharField(required=True, validators=[code_validator], help_text='6位数字短信验证码')
+    password = serializers.CharField(required=True, min_length=5, help_text='密码，不少于5位',
+                                     style={'input_type': 'password'})
+    username = serializers.CharField(required=True, source='user.username', help_text='登录用户名')
+    email = serializers.EmailField(required=True, source='user.email', help_text='邮箱')
+
+    class Meta:
+        model = models.Merchants
+        exclude = ['password', 'salt']
 
 
-class PasswordSetSerializer(MobileSerializer):
-    code = serializers.CharField(required=True, validators=[code_validator],help_text='6位数字短信验证码')
-    password = serializers.CharField(required=True, min_length=5,help_text='密码，不少于5位')
+class RegisterMobileSerializer(serializers.Serializer):
+    mobile = serializers.CharField(required=True, validators=[mobile_validator,
+                                                              UniqueValidator(queryset=models.Merchants.objects.all(),
+                                                                              message='该手机号已经注册过了')],
+                                   help_text='11位手机号，符号手机号规则')
+
+
+class ForgetMobileSerializer(serializers.Serializer):
+    mobile = serializers.CharField(required=True, validators=[mobile_validator], help_text='11位手机号，符号手机号规则')
+
+
+class PasswordSetSerializer(ForgetMobileSerializer):
+    code = serializers.CharField(required=True, validators=[code_validator], help_text='6位数字短信验证码')
+    password = serializers.CharField(required=True, min_length=5, help_text='新密码，不少于5位',
+                                     style={'input_type': 'password'})
 
 
 class PasswordResetSerializer(serializers.Serializer):
-    old_password = serializers.CharField(required=True,min_length=5)
-    new_password = serializers.CharField(required=True,min_length=5)
+    old_password = serializers.CharField(required=True, min_length=5, help_text='输入登录密码/旧密码',
+                                         style={'input_type': 'password'})
+    new_password = serializers.CharField(required=True, min_length=5, help_text='新密码！如果是超级用户可修改具体的商家密码，否则只能修改登录密码',
+                                         style={'input_type': 'password'})
