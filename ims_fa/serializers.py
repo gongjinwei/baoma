@@ -135,8 +135,9 @@ def mobile_validator(value):
     if not matcher:
         raise serializers.ValidationError('手机号码不正确')
 
+
 def code_validator(value):
-    matcher = re.match(r'^\d{6}$',value)
+    matcher = re.match(r'^\d{6}$', value)
     if not matcher:
         raise serializers.ValidationError('验证码不正确')
 
@@ -145,6 +146,11 @@ class MobileSerializer(serializers.Serializer):
     mobile = serializers.CharField(required=True, validators=[mobile_validator])
 
 
-class PasswordSetSerizer(MobileSerializer):
-    code = serializers.CharField(required=True,validators=[code_validator])
-    password = serializers.CharField(required=True,min_length=5)
+class PasswordSetSerializer(MobileSerializer):
+    code = serializers.CharField(required=True, validators=[code_validator])
+    password = serializers.CharField(required=True, min_length=5)
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True,min_length=5)
+    new_password = serializers.CharField(required=True,min_length=5)
