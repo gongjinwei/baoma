@@ -44,7 +44,7 @@ class SmsSender(object):
             strs += chars[random.randint(0, length)]
         return strs
 
-    def send(self, type='reset'):
+    def send(self, type='register'):
         if not isinstance(type,str):
             return (400,'发送类型错误')
         try:

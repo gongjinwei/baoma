@@ -1,9 +1,10 @@
 # -*- coding:UTF-8 -*-
 from rest_framework import serializers
 from . import models
-import uuid
+import uuid, re
 
 from django.contrib.auth.models import User
+
 
 class UUIDImageField(serializers.ImageField):
     def to_internal_value(self, data):
@@ -76,7 +77,6 @@ class SaddressSerializer(serializers.ModelSerializer):
 
 
 class MerchantLevelSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.MerchantLevel
         fields = '__all__'
@@ -119,7 +119,7 @@ class ConsumeRecordsSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields=['username','email']
+        fields = ['username', 'email']
 
 
 class MerchantRechargeSerializer(serializers.ModelSerializer):
@@ -127,4 +127,24 @@ class MerchantRechargeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.MerchantRecharge
-        fields='__all__'
+        fields = '__all__'
+
+
+def mobile_validator(value):
+    matcher = re.match('^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(18[0,5-9]))\\d{8}$', value)
+    if not matcher:
+        raise serializers.ValidationError('手机号码不正确')
+
+def code_validator(value):
+    matcher = re.match(r'^\d{6}$',value)
+    if not matcher:
+        raise serializers.ValidationError('验证码不正确')
+
+
+class MobileSerializer(serializers.Serializer):
+    mobile = serializers.CharField(required=True, validators=[mobile_validator])
+
+
+class PasswordSetSerizer(MobileSerializer):
+    code = serializers.CharField(required=True,validators=[code_validator])
+    password = serializers.CharField(required=True,min_length=5)
