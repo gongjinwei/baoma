@@ -11,7 +11,8 @@ from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status, filters, serializers as ser, views
+from rest_framework import viewsets, status, filters, serializers as ser
+from rest_framework.generics import GenericAPIView
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import detail_route
@@ -201,7 +202,7 @@ class MerchantsViewSet(viewsets.ModelViewSet):
         raise ser.ValidationError({'msg': "you can't create in this way,please create it from register", 'status': 400})
 
     @detail_route(methods=['post'])
-    def reset_password(self, request, pk=None):
+    def password_reset(self, request, pk=None):
         password_serializer = serializers.PasswordResetSerializer(data=request.data)
         if password_serializer.is_valid(raise_exception=True):
             old_password = password_serializer.validated_data['old_password']
@@ -256,11 +257,12 @@ class MerchantRechargeViewSet(viewsets.ModelViewSet):
         serializer.save(merchant=self.request.user.merchants, createtime=createtime)
 
 
-class RegisterView(views.APIView):
+class RegisterView(GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class = serializers.PasswordSetSerializer
 
     def post(self, request):
-        serializer = serializers.PasswordSetSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             mobile_recv = serializer.validated_data['mobile']
             register_code = serializer.validated_data['code']
@@ -281,8 +283,13 @@ class RegisterView(views.APIView):
             else:
                 return Response('验证码错误或已失效')
 
-    def put(self, request):
-        serializer = serializers.MobileSerializer(data=request.data)
+
+class RegisterSendView(GenericAPIView):
+    permission_classes = [AllowAny]
+    serializer_class=serializers.MobileSerializer
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             mobile = serializer.validated_data['mobile']
             sender = SmsSender(mobile)
@@ -290,11 +297,12 @@ class RegisterView(views.APIView):
             return Response(msg)
 
 
-class ForgetSendView(views.APIView):
+class ForgetSendView(GenericAPIView):
     permission_classes = [AllowAny]
+    serializer_class=serializers.MobileSerializer
 
     def post(self, request):
-        serializer = serializers.MobileSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             mobile = serializer.validated_data['mobile']
             try:
@@ -306,12 +314,13 @@ class ForgetSendView(views.APIView):
             return Response(msg)
 
 
-class PasswordForgetView(views.APIView):
+class PasswordForgetView(GenericAPIView):
+    serializer_class = serializers.PasswordSetSerializer
     permission_classes = [AllowAny]
 
     def post(self, request):
 
-        serializer = serializers.PasswordSetSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             mobile_recv = serializer.validated_data['mobile']
             code = serializer.validated_data['code']
