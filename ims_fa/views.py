@@ -258,6 +258,9 @@ class MerchantRechargeViewSet(viewsets.ModelViewSet):
 
 
 class RegisterView(GenericAPIView):
+    """
+        先创建用户，后创建商家
+    """
     permission_classes = [AllowAny]
     serializer_class = serializers.MerchantRegisterSerializer
 
