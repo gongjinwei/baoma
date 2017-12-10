@@ -3,7 +3,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from rest_framework.permissions import BasePermission
 from rest_framework.filters import BaseFilterBackend
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError,PermissionDenied
 import operator
 from django.db import models
 from functools import reduce
@@ -144,3 +144,19 @@ def create_records(sender, instance, created=False, *args, **kwargs):
             records.operator_id=instance.user.id
             records.operator_name=instance.user.username
             records.save()
+
+
+class FilterPermission(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+        assert view.filter_from is not None, "view hasn't attribute `filter_from`"
+        assert isinstance(view.filter_from, list), "filter_from must be a list"
+        filter_from = getattr(view, 'filter_from')
+        conditions = []
+        queries = [models.Q(**{lookup: request.user.id}) for lookup in filter_from]
+        conditions.append(reduce(operator.or_, queries))
+        if request.user.is_authenticated() and view.queryset.filter(reduce(operator.and_,conditions)).exists():
+            return True
+        else:
+            raise PermissionDenied('你无此操作权限')

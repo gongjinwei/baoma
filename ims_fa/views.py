@@ -163,6 +163,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     ordering = ('-order_id',)
     filter_from = ['publish_id__task_id__owner_id']
 
+
     @detail_route(methods=['patch'])
     def set_comment(self, request, pk=None):
         order_instance = models.Order.objects.get(pk=int(pk))
