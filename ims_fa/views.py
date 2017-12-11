@@ -282,7 +282,7 @@ class UserRegisterView(CreateOnlyViewSet):
                 merchant_serialier=serializers.MerchantsSerializer(data=serializer.validated_data)
                 if merchant_serialier.is_valid(raise_exception=True):
                     createtime = datetime.datetime.timestamp(datetime.datetime.now())
-                    merchant_serialier.save(user=user,createtime=createtime)
+                    merchant_serialier.save(user=user,createtime=createtime,mobile=mobile_recv)
                     return Response('创建成功',status=status.HTTP_200_OK)
             else:
                 return Response('验证码错误或已失效',status=status.HTTP_400_BAD_REQUEST)
@@ -350,3 +350,8 @@ class PasswordForgetView(CreateOnlyViewSet):
                 return Response('设置成功')
             else:
                 return Response('验证码不正确或已失效',status=status.HTTP_400_BAD_REQUEST)
+
+
+class SalesmanViewSet(viewsets.ModelViewSet):
+    queryset = models.Salesman.objects.all()
+    serializer_class = serializers.SalesmanSerializer

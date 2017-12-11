@@ -26,5 +26,6 @@ router.register(r'imageup', views.ImageUpViewSet)
 router.register(r'saddress', views.SaddressViewSet)
 router.register(r'consumerecords', views.ConsumeRecordsViewSet)
 router.register(r'merchantrecharge', views.MerchantRechargeViewSet)
+router.register(r'salesman',views.SalesmanViewSet)
 
 urlpatterns = router.urls

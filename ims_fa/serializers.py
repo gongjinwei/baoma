@@ -178,3 +178,9 @@ class PasswordResetSerializer(serializers.Serializer):
                                          style={'input_type': 'password'})
     new_password = serializers.CharField(required=True, min_length=5, help_text='新密码！如果是超级用户可修改具体的商家密码，否则只能修改登录密码',
                                          style={'input_type': 'password'})
+
+
+class SalesmanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=models.Salesman
+        fields = '__all__'
