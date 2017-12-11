@@ -11,7 +11,6 @@ from django.core.cache import cache
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, filters,serializers as ser
-from rest_framework.generics import GenericAPIView
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import detail_route
@@ -34,7 +33,7 @@ class ObtainExpireAuthToken(ObtainAuthToken,CreateOnlyViewSet):
 
     renderer_classes = (JSONRenderer, BrowsableAPIRenderer)
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
         if serializer.is_valid(raise_exception=True):
@@ -90,7 +89,7 @@ class TasksViewSet(viewsets.ModelViewSet):
         discount = merchant.level.discount / 100 if hasattr(merchant.level, 'discount') else 1
         pub_quantity = publish_serializer.validated_data.get('pub_quantity', 0)
         if pub_quantity == 0:
-            raise ser.ValidationError({'msg': '你的发布数量为0', 'status': 400})
+            raise ser.ValidationError({'msg': ['你的发布数量为0'], 'status': 400})
         goods_price = task_serializer.validated_data.get('goods_price', 0)
         goods_freight = task_serializer.validated_data.get('goods_freight', 0)
         task_type = task_serializer.validated_data.get('task_type', 0)
@@ -199,14 +198,8 @@ class MerchantsViewSet(viewsets.ModelViewSet):
     filter_backends = [UserPermissionFilterBackend]
     filter_from = ['user_id']
 
-
-    def perform_create(self, serializer):
-        if not self.request.user.is_authenticated():
-            raise ser.ValidationError('你必须先登录才能进行此操作')
-        if hasattr(self.request.user,'merchants'):
-            raise ser.ValidationError('非法操作！只能创建一个商家')
-        createtime = datetime.datetime.timestamp(datetime.datetime.now())
-        serializer.save(user=self.request.user, createtime=createtime, mobile=self.request.user.username)
+    def create(self, request, *args, **kwargs):
+        raise ser.ValidationError({'msg':["you can't create a merchant in this way ,please do it from register"]})
 
     @detail_route(methods=['post'],serializer_class=serializers.PasswordResetSerializer)
     def password_reset(self, request, pk=None):
@@ -286,7 +279,11 @@ class UserRegisterView(CreateOnlyViewSet):
                 user = User(username=mobile_recv,email='',is_active=True,)
                 user.set_password(password)
                 user.save()
-                return Response('创建成功',status=status.HTTP_200_OK)
+                merchant_serialier=serializers.MerchantsSerializer(data=serializer.validated_data)
+                if merchant_serialier.is_valid(raise_exception=True):
+                    createtime = datetime.datetime.timestamp(datetime.datetime.now())
+                    merchant_serialier.save(user=user,createtime=createtime)
+                    return Response('创建成功',status=status.HTTP_200_OK)
             else:
                 return Response('验证码错误或已失效',status=status.HTTP_400_BAD_REQUEST)
 
@@ -304,6 +301,8 @@ class RegisterSendView(CreateOnlyViewSet):
             mobile = serializer.validated_data['mobile']
             sender = SmsSender(mobile)
             code, msg = sender.send(type='register')
+            if msg !=1000:
+                return Response(msg,status=status.HTTP_400_BAD_REQUEST)
             return Response(msg)
 
 
@@ -321,9 +320,11 @@ class ForgetSendView(CreateOnlyViewSet):
             if models.Merchants.objects.filter(mobile=mobile).exists():
                 sender = SmsSender(mobile)
                 code, msg = sender.send(type='forget')
+                if msg != 1000:
+                    return Response(msg, status=status.HTTP_400_BAD_REQUEST)
                 return Response(msg)
             else:
-                return Response('不存在此电话号码')
+                return Response('不存在此电话号码',status=status.HTTP_400_BAD_REQUEST)
 
 
 class PasswordForgetView(CreateOnlyViewSet):
@@ -348,4 +349,4 @@ class PasswordForgetView(CreateOnlyViewSet):
                 cache.delete(code + 'forget' + '_mobile')
                 return Response('设置成功')
             else:
-                return Response('验证码不正确或已失效')
+                return Response('验证码不正确或已失效',status=status.HTTP_400_BAD_REQUEST)

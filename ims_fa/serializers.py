@@ -143,12 +143,17 @@ def code_validator(value):
         raise serializers.ValidationError('验证码不正确')
 
 
-class UserRegisterSerializer(serializers.Serializer):
+class UserRegisterSerializer(serializers.ModelSerializer):
     mobile = serializers.CharField(required=True, validators=[mobile_validator],
                                    help_text='11位手机号，作为用户名登录。必须符号手机号规则，不能与注册手机重复')
     code = serializers.CharField(required=True, validators=[code_validator], help_text='6位数字短信验证码')
     password = serializers.CharField(required=True, min_length=5, help_text='密码，不少于5位',
                                      style={'input_type': 'password'})
+
+    class Meta:
+        model = models.Merchants
+        exclude = ['password', 'salt']
+        read_only_fields = ['mobile']
 
 
 class RegisterMobileSerializer(serializers.Serializer):
