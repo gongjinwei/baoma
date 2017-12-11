@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 
 
 class CustomerUserAdmin(UserAdmin):
-    list_display = ('id','username', 'email', 'first_name', 'last_name', 'is_staff')
+    list_display = ('id','username', 'email', 'first_name', 'last_name', 'is_active','is_staff')
     ordering = ('id',)
 
 
