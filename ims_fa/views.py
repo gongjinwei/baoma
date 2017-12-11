@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status, filters, serializers as ser
+from rest_framework import viewsets, status, filters,mixins ,serializers as ser
 from rest_framework.generics import GenericAPIView
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
@@ -22,6 +22,7 @@ from . import models
 from . import serializers
 from .permission import UserPermissionFilterBackend
 from .SmsClient import SmsSender
+from .viewset import CreateOnlyViewSet
 
 
 class ObtainExpireAuthToken(ObtainAuthToken,GenericAPIView):
@@ -164,7 +165,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     ordering = ('-order_id',)
     filter_from = ['publish_id__task_id__owner_id']
 
-
     @detail_route(methods=['patch'])
     def set_comment(self, request, pk=None):
         order_instance = models.Order.objects.get(pk=int(pk))
@@ -194,12 +194,14 @@ class MerchantsViewSet(viewsets.ModelViewSet):
     filter_backends = [UserPermissionFilterBackend]
     filter_from = ['user_id']
 
-    def create(self, request, *args, **kwargs):
-        """
-            只能新建一个商家！
-        """
 
-        raise ser.ValidationError({'msg': "you can't create in this way,please create it from register", 'status': 400})
+    def perform_create(self, serializer):
+        if not self.request.user.is_authenticated():
+            raise ser.ValidationError('你必须先登录才能进行此操作')
+        if hasattr(self.request.user,'merchants'):
+            raise ser.ValidationError('非法操作！只能创建一个商家')
+        createtime = datetime.datetime.timestamp(datetime.datetime.now())
+        serializer.save(user=self.request.user, createtime=createtime, mobile=self.request.user.username)
 
     @detail_route(methods=['post'],serializer_class=serializers.PasswordResetSerializer)
     def password_reset(self, request, pk=None):
@@ -260,14 +262,14 @@ class MerchantRechargeViewSet(viewsets.ModelViewSet):
         serializer.save(merchant=self.request.user.merchants, createtime=createtime)
 
 
-class RegisterView(GenericAPIView):
+class UserRegisterView(CreateOnlyViewSet):
     """
-        先创建用户，后创建商家。登录用户名与手机号相同
+        验证手机号并创建一个用户。登录用户名与手机号相同
     """
     permission_classes = [AllowAny]
-    serializer_class = serializers.MerchantRegisterSerializer
+    serializer_class = serializers.UserRegisterSerializer
 
-    def post(self, request):
+    def create(self, request,*args,**kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             mobile_recv = serializer.validated_data['mobile']
@@ -276,27 +278,22 @@ class RegisterView(GenericAPIView):
 
             mobile_cache = cache.get(register_code + 'register' + '_mobile')
             if mobile_recv == mobile_cache:
-                user = User(username=mobile_recv,email=serializer.validated_data['user']['email'],is_active=True)
+                user = User(username=mobile_recv,email='',is_active=True,)
                 user.set_password(password)
                 user.save()
-                merchant_serializer = serializers.MerchantsSerializer(data=serializer.validated_data)
-                if merchant_serializer.is_valid(
-                        raise_exception=True):
-                    createtime = datetime.datetime.timestamp(datetime.datetime.now())
-                    merchant_serializer.save(user=user, createtime=createtime)
-                    return Response(merchant_serializer.data, status=status.HTTP_201_CREATED)
+                return Response('创建成功',status=status.HTTP_200_OK)
             else:
-                return Response('验证码错误或已失效')
+                return Response('验证码错误或已失效',status=status.HTTP_400_BAD_REQUEST)
 
 
-class RegisterSendView(GenericAPIView):
+class RegisterSendView(CreateOnlyViewSet):
     """
         发送注册的手机验证码
     """
     permission_classes = [AllowAny]
     serializer_class=serializers.RegisterMobileSerializer
 
-    def post(self, request):
+    def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             mobile = serializer.validated_data['mobile']
@@ -305,14 +302,14 @@ class RegisterSendView(GenericAPIView):
             return Response(msg)
 
 
-class ForgetSendView(GenericAPIView):
+class ForgetSendView(CreateOnlyViewSet):
     """
         发送密码重置的手机验证码
     """
     permission_classes = [AllowAny]
     serializer_class=serializers.ForgetMobileSerializer
 
-    def post(self, request):
+    def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             mobile = serializer.validated_data['mobile']
@@ -324,15 +321,14 @@ class ForgetSendView(GenericAPIView):
                 return Response('不存在此电话号码')
 
 
-class PasswordForgetView(GenericAPIView):
+class PasswordForgetView(CreateOnlyViewSet):
     """
         忘记密码后的重置操作，需要提供重置的手机号，有效验证码及新密码
     """
     serializer_class = serializers.PasswordSetSerializer
     permission_classes = [AllowAny]
 
-    def post(self, request):
-
+    def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             mobile_recv = serializer.validated_data['mobile']

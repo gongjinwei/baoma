@@ -86,12 +86,12 @@ class MerchantLevelSerializer(serializers.ModelSerializer):
 class MerchantsSerializer(serializers.ModelSerializer):
     stores = serializers.StringRelatedField(many=True, read_only=True)
     user = serializers.ReadOnlyField(source='user.id')
-    email = serializers.ReadOnlyField(source='user.email')
     level = MerchantLevelSerializer(read_only=True)
 
     class Meta:
         model = models.Merchants
         exclude = ['password', 'salt']
+        read_only_fields = ['mobile']
 
 
 class PageSerializer(serializers.ModelSerializer):
@@ -143,17 +143,12 @@ def code_validator(value):
         raise serializers.ValidationError('验证码不正确')
 
 
-class MerchantRegisterSerializer(serializers.ModelSerializer):
+class UserRegisterSerializer(serializers.Serializer):
     mobile = serializers.CharField(required=True, validators=[mobile_validator],
                                    help_text='11位手机号，作为用户名登录。必须符号手机号规则，不能与注册手机重复')
     code = serializers.CharField(required=True, validators=[code_validator], help_text='6位数字短信验证码')
     password = serializers.CharField(required=True, min_length=5, help_text='密码，不少于5位',
                                      style={'input_type': 'password'})
-    email = serializers.EmailField(required=True, source='user.email', help_text='邮箱')
-
-    class Meta:
-        model = models.Merchants
-        exclude = ['password', 'salt']
 
 
 class RegisterMobileSerializer(serializers.Serializer):
