@@ -283,7 +283,7 @@ class UserRegisterView(CreateOnlyViewSet):
                 if merchant_serialier.is_valid(raise_exception=True):
                     createtime = datetime.datetime.timestamp(datetime.datetime.now())
                     merchant_serialier.save(user=user,createtime=createtime,mobile=mobile_recv)
-                    return Response({'msg':'创建成功','status':200},status=status.HTTP_200_OK)
+                    return Response({'msg':'账号注册成功[%s]'%mobile_recv,'status':200},status=status.HTTP_200_OK)
             else:
                 return Response({'msg':'验证码错误或已失效','status':400},status=status.HTTP_400_BAD_REQUEST)
 
