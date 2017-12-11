@@ -89,7 +89,7 @@ class TasksViewSet(viewsets.ModelViewSet):
         discount = merchant.level.discount / 100 if hasattr(merchant.level, 'discount') else 1
         pub_quantity = publish_serializer.validated_data.get('pub_quantity', 0)
         if pub_quantity == 0:
-            raise ser.ValidationError({'msg': ['你的发布数量为0'], 'status': 400})
+            raise ser.ValidationError({'msg': '你的发布数量为0', 'status': 400})
         goods_price = task_serializer.validated_data.get('goods_price', 0)
         goods_freight = task_serializer.validated_data.get('goods_freight', 0)
         task_type = task_serializer.validated_data.get('task_type', 0)
@@ -106,9 +106,9 @@ class TasksViewSet(viewsets.ModelViewSet):
         publish_serializer.is_valid(raise_exception=True)
         if not request.user.is_superuser and task_serializer.validated_data[
             'store_id'].merchant_id.user_id != request.user.id:
-            raise ser.ValidationError({'msg': ['你不能对不属于你的店铺做任务发布'], 'status': 400})
+            raise ser.ValidationError({'msg': '你不能对不属于你的店铺做任务发布', 'status': 400})
         if not request.data.get('pubs_start', ''):
-            raise ser.ValidationError({'msg': ['请填写体验日期'], 'status': 400})
+            raise ser.ValidationError({'msg': '请填写体验日期', 'status': 400})
         val, total_fee = self.minus_task_fee(task_serializer, publish_serializer)
         if val:
             merchant_instance = self.request.user.merchants
@@ -132,7 +132,7 @@ class TasksViewSet(viewsets.ModelViewSet):
             headers = self.get_success_headers(task_serializer.data)
             return Response(task_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-        return Response({'msg': ["你的余额不足，请充值"], 'status': 406}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        return Response({'msg': "你的余额不足，请充值", 'status': 406}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     def perform_create(self, serializer):
         time_now = datetime.datetime.now()
@@ -199,7 +199,7 @@ class MerchantsViewSet(viewsets.ModelViewSet):
     filter_from = ['user_id']
 
     def create(self, request, *args, **kwargs):
-        raise ser.ValidationError({'msg':["you can't create a merchant in this way ,please do it from register"]})
+        raise ser.ValidationError({'msg':"you can't create a merchant in this way ,please do it from register",'status':400})
 
     @detail_route(methods=['post'],serializer_class=serializers.PasswordResetSerializer)
     def password_reset(self, request, pk=None):
@@ -218,11 +218,11 @@ class MerchantsViewSet(viewsets.ModelViewSet):
                     if user_login.is_superuser or user_change == user_login:
                         user_change.password = make_password(new_password)
                         user_change.save()
-                        return Response('Password is set done')
-                    return Response("No permission to do this", status=status.HTTP_400_BAD_REQUEST)
-                return Response("password is wrong", status=status.HTTP_400_BAD_REQUEST)
+                        return Response({'msg':'Password is set done','status':200})
+                    return Response({'msg':"No permission to do this",'status':400}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'msg':"password is wrong",'status':400}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response("password can't be null and the same", status=status.HTTP_400_BAD_REQUEST)
+                return Response({'msg':"password can't be null and the same",'status':400}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ImageUpViewSet(viewsets.ModelViewSet):
@@ -283,9 +283,9 @@ class UserRegisterView(CreateOnlyViewSet):
                 if merchant_serialier.is_valid(raise_exception=True):
                     createtime = datetime.datetime.timestamp(datetime.datetime.now())
                     merchant_serialier.save(user=user,createtime=createtime,mobile=mobile_recv)
-                    return Response('创建成功',status=status.HTTP_200_OK)
+                    return Response({'msg':'创建成功','status':200},status=status.HTTP_200_OK)
             else:
-                return Response('验证码错误或已失效',status=status.HTTP_400_BAD_REQUEST)
+                return Response({'msg':'验证码错误或已失效','status':400},status=status.HTTP_400_BAD_REQUEST)
 
 
 class RegisterSendView(CreateOnlyViewSet):
@@ -302,8 +302,8 @@ class RegisterSendView(CreateOnlyViewSet):
             sender = SmsSender(mobile)
             code, msg = sender.send(type='register')
             if code !=1000:
-                return Response(msg,status=status.HTTP_400_BAD_REQUEST)
-            return Response(msg)
+                return Response({'msg':msg,'status':400}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'msg': msg, 'status': 200}, status=status.HTTP_200_OK)
 
 
 class ForgetSendView(CreateOnlyViewSet):
@@ -321,10 +321,10 @@ class ForgetSendView(CreateOnlyViewSet):
                 sender = SmsSender(mobile)
                 code, msg = sender.send(type='forget')
                 if code != 1000:
-                    return Response(msg, status=status.HTTP_400_BAD_REQUEST)
-                return Response(msg)
+                    return Response({'msg':msg,'status':400}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'msg':msg,'status':200},status=status.HTTP_200_OK)
             else:
-                return Response('不存在此电话号码',status=status.HTTP_400_BAD_REQUEST)
+                return Response({'msg':'不存在此电话号码','status':400},status=status.HTTP_400_BAD_REQUEST)
 
 
 class PasswordForgetView(CreateOnlyViewSet):
@@ -347,9 +347,9 @@ class PasswordForgetView(CreateOnlyViewSet):
                 user.password = make_password(password)
                 user.save()
                 cache.delete(code + 'forget' + '_mobile')
-                return Response('设置成功')
+                return Response({'msg':'设置成功','status':200},status=status.HTTP_200_OK)
             else:
-                return Response('验证码不正确或已失效',status=status.HTTP_400_BAD_REQUEST)
+                return Response({'msg':'验证码不正确或已失效','status':400},status=status.HTTP_400_BAD_REQUEST)
 
 
 class SalesmanViewSet(viewsets.ModelViewSet):
