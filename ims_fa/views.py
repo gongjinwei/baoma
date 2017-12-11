@@ -10,13 +10,14 @@ from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status, filters,mixins ,serializers as ser
+from rest_framework import viewsets, status, filters,serializers as ser
 from rest_framework.generics import GenericAPIView
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.renderers import BrowsableAPIRenderer,JSONRenderer
 
 from . import models
 from . import serializers
@@ -25,10 +26,14 @@ from .SmsClient import SmsSender
 from .viewset import CreateOnlyViewSet
 
 
-class ObtainExpireAuthToken(ObtainAuthToken,GenericAPIView):
+class ObtainExpireAuthToken(ObtainAuthToken,CreateOnlyViewSet):
+
     """"
         输入用户名和密码来获取Token,请求头带上Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b
     """
+
+    renderer_classes = (JSONRenderer, BrowsableAPIRenderer)
+
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
