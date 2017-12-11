@@ -2,14 +2,22 @@
 import datetime
 from django.conf import settings
 from rest_framework import exceptions
-from rest_framework.authentication import TokenAuthentication,SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
 from django.utils.translation import ugettext_lazy as _
 
 from django.core.cache import cache
 
 
-EXPIRE_MINUTES=getattr(settings,'REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES',1)
+class ExceptionsIsAuthenticated(IsAuthenticated):
+    def has_permission(self, request, view):
+        if request.path == '/open/':
+            return True
+        return request.user and request.user.is_authenticated
+
+
+EXPIRE_MINUTES = getattr(settings, 'REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES', 1)
 
 
 class ExpiringTokenAuthentication(TokenAuthentication):

@@ -25,7 +25,7 @@ from .settings import MEDIA_ROOT ,STATIC_ROOT
 from ims_fa.views import UserRegisterView,PasswordForgetView,ForgetSendView,RegisterSendView,ObtainExpireAuthToken
 
 register_router = DefaultRouter()
-register_router.register(r'user',UserRegisterView,base_name='register_user')
+register_router.register(r'register_user',UserRegisterView,base_name='register_user')
 register_router.register(r'forget',PasswordForgetView,base_name='forget_password')
 register_router.register(r'register_send',RegisterSendView,base_name='register_send')
 register_router.register(r'forget_send',ForgetSendView,base_name='forget_send')
@@ -36,7 +36,7 @@ urlpatterns = [
     url(r'^api-token-auth/$',ObtainExpireAuthToken.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api/',include('ims_fa.urls',namespace='api')),
-    url(r'^register/',include(register_router.urls,namespace='register')),
+    url(r'^open/',include(register_router.urls,namespace='open')),
     # url(r'^pandas/',include('authadmin.urls',namespace='pandas')),
     # url(r'^media/(?P<path>.*$)',serve,{'document_root': MEDIA_ROOT}),
     # url(r'^static/(?P<path>.*$)',serve,{'document_root': STATIC_ROOT}),
