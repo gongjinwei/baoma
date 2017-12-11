@@ -301,7 +301,7 @@ class RegisterSendView(CreateOnlyViewSet):
             mobile = serializer.validated_data['mobile']
             sender = SmsSender(mobile)
             code, msg = sender.send(type='register')
-            if msg !=1000:
+            if code !=1000:
                 return Response(msg,status=status.HTTP_400_BAD_REQUEST)
             return Response(msg)
 
@@ -320,7 +320,7 @@ class ForgetSendView(CreateOnlyViewSet):
             if models.Merchants.objects.filter(mobile=mobile).exists():
                 sender = SmsSender(mobile)
                 code, msg = sender.send(type='forget')
-                if msg != 1000:
+                if code != 1000:
                     return Response(msg, status=status.HTTP_400_BAD_REQUEST)
                 return Response(msg)
             else:
