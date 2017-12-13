@@ -82,9 +82,14 @@ class MerchantLevelSerializer(serializers.ModelSerializer):
         model = models.MerchantLevel
         fields = '__all__'
 
+class SalesmanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=models.Salesman
+        exclude = ['password', 'salt']
 
 class MerchantsSerializer(serializers.ModelSerializer):
     stores = serializers.StringRelatedField(many=True, read_only=True)
+    salesman = SalesmanSerializer(read_only=True)
     user = serializers.ReadOnlyField(source='user.id')
     level = MerchantLevelSerializer(read_only=True)
 
@@ -180,7 +185,4 @@ class PasswordResetSerializer(serializers.Serializer):
                                          style={'input_type': 'password'})
 
 
-class SalesmanSerializer(serializers.ModelSerializer):
-    class Meta:
-        model=models.Salesman
-        fields = '__all__'
+

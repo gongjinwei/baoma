@@ -271,6 +271,11 @@ class UserRegisterView(CreateOnlyViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+        salesman_id = request.data.get('salesman_id',0)
+        if models.Salesman.objects.filter(pk=int(salesman_id)).exists():
+            salesman = models.Salesman.objects.get(pk=int(salesman_id))
+        else:
+            raise ser.ValidationError({'msg':['该业务员不存在']})
         if serializer.is_valid(raise_exception=True):
             mobile_recv = serializer.validated_data['mobile']
             register_code = serializer.validated_data['code']
@@ -284,7 +289,7 @@ class UserRegisterView(CreateOnlyViewSet):
                 merchant_serialier = serializers.MerchantsSerializer(data=serializer.validated_data)
                 if merchant_serialier.is_valid(raise_exception=True):
                     createtime = datetime.datetime.timestamp(datetime.datetime.now())
-                    merchant_serialier.save(user=user, createtime=createtime, mobile=mobile_recv)
+                    merchant_serialier.save(user=user, createtime=createtime, mobile=mobile_recv,salesman=salesman)
                     return Response({'msg': ['账号注册成功[%s]' % mobile_recv]}, status=status.HTTP_200_OK)
             else:
                 return Response({'msg': ['验证码错误或已失效']}, status=status.HTTP_400_BAD_REQUEST)
@@ -357,3 +362,7 @@ class PasswordForgetView(CreateOnlyViewSet):
 class SalesmanViewSet(viewsets.ModelViewSet):
     queryset = models.Salesman.objects.all()
     serializer_class = serializers.SalesmanSerializer
+
+    def perform_create(self, serializer):
+        createtime = datetime.datetime.timestamp(datetime.datetime.now())
+        serializer.save(createtime=createtime)

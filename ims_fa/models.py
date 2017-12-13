@@ -359,7 +359,7 @@ class Merchants(models.Model):
     money_balance = models.DecimalField(max_digits=10, decimal_places=2,default=0,editable=False)
     level = models.ForeignKey('MerchantLevel',default=1,editable=False)
     referee_id = models.IntegerField(default=0)
-    salesman_id = models.IntegerField(default=0)
+    salesman = models.ForeignKey('Salesman',default=0)
     expiry_time = models.IntegerField(default=0,editable=False)
     createtime = models.IntegerField(editable=False)
     updatetime = models.IntegerField(editable=False)
@@ -668,15 +668,18 @@ class MerchantRecharge(models.Model):
 class Salesman(models.Model):
     salesman_id = models.AutoField(primary_key=True)
     mobile = models.CharField(max_length=11)
-    password = models.CharField(max_length=40)
-    salt = models.CharField(max_length=8)
-    wechat = models.CharField(max_length=30)
-    qq = models.CharField(max_length=15)
-    realname = models.CharField(max_length=10)
-    type = models.SmallIntegerField()
-    state = models.SmallIntegerField()
-    createtime = models.ImageField()
+    password = models.CharField(max_length=40,default='')
+    salt = models.CharField(max_length=8,default='')
+    wechat = models.CharField(max_length=30,default='')
+    qq = models.CharField(max_length=15,default='')
+    realname = models.CharField(max_length=10,default='')
+    type = models.SmallIntegerField(default=1)
+    state = models.SmallIntegerField(default=1)
+    createtime = models.IntegerField(editable=False)
 
     class Meta:
         managed=False
         db_table = 'ims_fa_salesman'
+
+    def __str__(self):
+        return self.realname
