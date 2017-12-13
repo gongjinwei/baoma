@@ -359,11 +359,11 @@ class Merchants(models.Model):
     money_balance = models.DecimalField(max_digits=10, decimal_places=2,default=0,editable=False)
     level = models.ForeignKey('MerchantLevel',default=1,editable=False)
     referee_id = models.IntegerField(default=0)
-    salesman = models.ForeignKey('Salesman',default=0)
+    salesman_id = models.IntegerField(default=0)
     expiry_time = models.IntegerField(default=0,editable=False)
     createtime = models.IntegerField(editable=False)
     updatetime = models.IntegerField(editable=False)
-    user = models.OneToOneField(User,editable=False,null=True)
+    user = models.OneToOneField(User,editable=False,on_delete=models.CASCADE)
 
     class Meta:
         managed = False

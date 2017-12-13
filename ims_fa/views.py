@@ -198,6 +198,7 @@ class MerchantsViewSet(viewsets.ModelViewSet):
     filter_from = ['user_id']
 
     def create(self, request, *args, **kwargs):
+
         raise ser.ValidationError(
             {'msg': ["you can't create a merchant in this way ,please do it from register"]})
 
@@ -271,11 +272,7 @@ class UserRegisterView(CreateOnlyViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        salesman_id = request.data.get('salesman_id',0)
-        if models.Salesman.objects.filter(pk=int(salesman_id)).exists():
-            salesman = models.Salesman.objects.get(pk=int(salesman_id))
-        else:
-            raise ser.ValidationError({'msg':['该业务员不存在']})
+
         if serializer.is_valid(raise_exception=True):
             mobile_recv = serializer.validated_data['mobile']
             register_code = serializer.validated_data['code']
@@ -283,13 +280,19 @@ class UserRegisterView(CreateOnlyViewSet):
 
             mobile_cache = cache.get(register_code + 'register' + '_mobile')
             if mobile_recv == mobile_cache:
-                user = User(username=mobile_recv, email='', is_active=True, )
+                if User.objects.filter(username=mobile_recv).exists():
+                    raise ser.ValidationError({'msg': ['你的手机已经被注册']})
+                if not models.Salesman.objects.filter(salesman_id=serializer.validated_data.get('salesman_id',0)).exists():
+                    raise ser.ValidationError({'msg':['这个推荐人不存在']})
+                user = User(username=mobile_recv, email='', is_active=True)
                 user.set_password(password)
                 user.save()
                 merchant_serialier = serializers.MerchantsSerializer(data=serializer.validated_data)
                 if merchant_serialier.is_valid(raise_exception=True):
                     createtime = datetime.datetime.timestamp(datetime.datetime.now())
-                    merchant_serialier.save(user=user, createtime=createtime, mobile=mobile_recv,salesman=salesman)
+
+                    merchant_serialier.save(user=user, createtime=createtime, mobile=mobile_recv)
+                    cache.delete(register_code + 'register' + '_mobile')
                     return Response({'msg': ['账号注册成功[%s]' % mobile_recv]}, status=status.HTTP_200_OK)
             else:
                 return Response({'msg': ['验证码错误或已失效']}, status=status.HTTP_400_BAD_REQUEST)

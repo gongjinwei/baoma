@@ -82,10 +82,12 @@ class MerchantLevelSerializer(serializers.ModelSerializer):
         model = models.MerchantLevel
         fields = '__all__'
 
+
 class SalesmanSerializer(serializers.ModelSerializer):
     class Meta:
         model=models.Salesman
         exclude = ['password', 'salt']
+
 
 class MerchantsSerializer(serializers.ModelSerializer):
     stores = serializers.StringRelatedField(many=True, read_only=True)
