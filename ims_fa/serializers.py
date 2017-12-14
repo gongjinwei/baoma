@@ -91,7 +91,7 @@ class SalesmanSerializer(serializers.ModelSerializer):
 
 class MerchantsSerializer(serializers.ModelSerializer):
     stores = serializers.StringRelatedField(many=True, read_only=True)
-    salesman = SalesmanSerializer(read_only=True)
+    salesman = serializers.SerializerMethodField()
     user = serializers.ReadOnlyField(source='user.id')
     level = MerchantLevelSerializer(read_only=True)
 
@@ -99,6 +99,10 @@ class MerchantsSerializer(serializers.ModelSerializer):
         model = models.Merchants
         exclude = ['password', 'salt']
         read_only_fields = ['mobile']
+
+    def get_salesman(self,obj):
+        if obj.salesman_id is not None:
+            return models.Salesman.objects.values('salesman_id','mobile','wechat','qq','realname','state','type','createtime').get(pk=obj.salesman_id)
 
 
 class PageSerializer(serializers.ModelSerializer):

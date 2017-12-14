@@ -283,7 +283,7 @@ class UserRegisterView(CreateOnlyViewSet):
                 if User.objects.filter(username=mobile_recv).exists():
                     raise ser.ValidationError({'msg': ['你的手机已经被注册']})
                 if not models.Salesman.objects.filter(salesman_id=serializer.validated_data.get('salesman_id',0)).exists():
-                    raise ser.ValidationError({'msg':['这个推荐人不存在']})
+                    raise ser.ValidationError({'msg':['业务员id不存在']})
                 user = User(username=mobile_recv, email='', is_active=True)
                 user.set_password(password)
                 user.save()
