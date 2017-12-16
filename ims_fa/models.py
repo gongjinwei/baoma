@@ -295,8 +295,8 @@ class Images(models.Model):
 
 class ImagesShow(models.Model):
     image_id = models.AutoField(primary_key=True)
-    owner_id = models.ForeignKey('Order',related_name='imagesShow',db_column='owner_id')
-    path = models.ImageField(max_length=255,editable=False)
+    owner_id = models.ForeignKey('Order', related_name='imagesShow', db_column='owner_id')
+    path = models.ImageField(max_length=255, editable=False)
     image_type = models.IntegerField()
     image_state = models.IntegerField(editable=False)
     is_selected = models.IntegerField(editable=False)
@@ -348,42 +348,42 @@ class Members(models.Model):
 
 class Merchants(models.Model):
     merchant_id = models.AutoField(primary_key=True)
-    mobile = models.CharField(max_length=11,unique=True,help_text='手机号')
-    password = models.CharField(max_length=32,default='')
-    salt = models.CharField(max_length=8,default='')
-    wechat = models.CharField(max_length=30,default='',help_text='微信号')
-    qq = models.CharField(max_length=15,default='',help_text='QQ号')
-    realname = models.CharField(max_length=10,help_text='真实姓名，用于登录显示')
-    own_shop = models.IntegerField(editable=False,default=0)
-    merchant_state = models.IntegerField(editable=False,default=1)
-    money_balance = models.DecimalField(max_digits=10, decimal_places=2,default=0,editable=False)
-    level = models.ForeignKey('MerchantLevel',default=1,editable=False)
+    mobile = models.CharField(max_length=11, unique=True, help_text='手机号')
+    password = models.CharField(max_length=32, default='')
+    salt = models.CharField(max_length=8, default='')
+    wechat = models.CharField(max_length=30, default='', help_text='微信号')
+    qq = models.CharField(max_length=15, default='', help_text='QQ号')
+    realname = models.CharField(max_length=10, help_text='真实姓名，用于登录显示')
+    own_shop = models.IntegerField(editable=False, default=0)
+    merchant_state = models.IntegerField(editable=False, default=1)
+    money_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
+    level = models.ForeignKey('MerchantLevel', default=1, editable=False)
     referee_id = models.IntegerField(default=0)
     salesman_id = models.IntegerField(default=0)
-    expiry_time = models.IntegerField(default=0,editable=False)
+    expiry_time = models.IntegerField(default=0, editable=False)
     createtime = models.IntegerField(editable=False)
     updatetime = models.IntegerField(editable=False)
-    user = models.OneToOneField(User,editable=False,on_delete=models.CASCADE)
+    user = models.OneToOneField(User, editable=False, on_delete=models.CASCADE)
 
     class Meta:
         managed = False
         db_table = 'ims_fa_merchants'
 
-    def save(self, *args,**kwargs):
-        self.updatetime=datetime.datetime.timestamp(datetime.datetime.now())
-        super(Merchants,self).save(*args,**kwargs)
+    def save(self, *args, **kwargs):
+        self.updatetime = datetime.datetime.timestamp(datetime.datetime.now())
+        super(Merchants, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.realname
 
 
-pre_save.connect(create_records,Merchants)
+pre_save.connect(create_records, Merchants)
 
 
 class MerchantLevel(models.Model):
     level_id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=50)
-    price = models.DecimalField(max_digits=8,decimal_places=2)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
     discount = models.SmallIntegerField(default=100)
     store_num = models.SmallIntegerField(default=0)
     sort = models.IntegerField(default=0)
@@ -391,7 +391,7 @@ class MerchantLevel(models.Model):
 
     class Meta:
         managed = False
-        db_table='ims_fa_merchant_level'
+        db_table = 'ims_fa_merchant_level'
 
 
 class Models(models.Model):
@@ -431,7 +431,7 @@ class Order(models.Model):
     platform_comment_images = models.CharField(max_length=1024)
     goods_title = models.CharField(max_length=80)
     goods_url = models.CharField(max_length=255)
-    goods_image = models.ImageField(max_length=255,editable=False)
+    goods_image = models.ImageField(max_length=255, editable=False)
     goods_price = models.DecimalField(max_digits=8, decimal_places=2)
     goods_freight = models.DecimalField(max_digits=8, decimal_places=2)
     task_commission = models.DecimalField(max_digits=6, decimal_places=2)
@@ -495,7 +495,7 @@ class Publish(models.Model):
 
 class Saddress(models.Model):
     address_id = models.AutoField(primary_key=True)
-    merchant_id = models.ForeignKey('Merchants', db_column='merchant_id', related_name='addresses',editable=False)
+    merchant_id = models.ForeignKey('Merchants', db_column='merchant_id', related_name='addresses', editable=False)
     consignee = models.CharField(max_length=20)
     phone = models.CharField(max_length=12)
     province = models.CharField(max_length=20)
@@ -508,21 +508,22 @@ class Saddress(models.Model):
         managed = False
         db_table = 'ims_fa_saddress'
 
-    def save(self,*args,**kwargs):
+    def save(self, *args, **kwargs):
         if self.is_default:
-            addresses=Saddress.objects.filter(merchant_id=self.merchant_id)
+            addresses = Saddress.objects.filter(merchant_id=self.merchant_id)
             if addresses:
                 addresses.update(is_default=0)
-        super(Saddress,self).save(*args,**kwargs)
+        super(Saddress, self).save(*args, **kwargs)
 
 
 class Stores(models.Model):
     store_id = models.AutoField(primary_key=True)
-    merchant_id = models.ForeignKey('Merchants', db_column='merchant_id', related_name='stores',editable=False)
+    merchant_id = models.ForeignKey('Merchants', db_column='merchant_id', related_name='stores', editable=False,
+                                    on_delete=models.CASCADE)
     store_platform = models.IntegerField(default=0)
-    store_name = models.CharField(max_length=45,default='')
-    store_url = models.CharField(max_length=255,default='')
-    store_state = models.IntegerField(default=0,editable=False)
+    store_name = models.CharField(max_length=45, default='')
+    store_url = models.CharField(max_length=255, default='')
+    store_state = models.IntegerField(default=0, editable=False)
     createtime = models.IntegerField(editable=False)
 
     class Meta:
@@ -535,7 +536,7 @@ class Stores(models.Model):
 
 class Tasks(models.Model):
     task_id = models.AutoField(primary_key=True)
-    store_id = models.ForeignKey('Stores',db_column='store_id',related_name='tasks')
+    store_id = models.ForeignKey('Stores', db_column='store_id', related_name='tasks')
     task_type = models.IntegerField()
     task_name = models.CharField(max_length=50, verbose_name='任务名称', default='')
     task_platform = models.IntegerField(verbose_name='任务平台', default=0)
@@ -543,7 +544,7 @@ class Tasks(models.Model):
     goods_url = models.CharField(max_length=255, default='')
     goods_image = models.CharField(max_length=255, default='')
     sku_image = models.CharField(max_length=255, default='')
-    goods_body = models.CharField(default='',max_length=1024)
+    goods_body = models.CharField(default='', max_length=1024)
     goods_price = models.DecimalField(max_digits=8, decimal_places=2)
     goods_weight = models.FloatField(default=0)
     goods_freight = models.DecimalField(max_digits=8, decimal_places=2, default=0)
@@ -553,7 +554,7 @@ class Tasks(models.Model):
     position = models.CharField(max_length=45, default='')
     search_image = models.CharField(max_length=255, default='')
     condition_image = models.CharField(max_length=255, default='')
-    taotoken = models.CharField(default='',max_length=1024,null=True)
+    taotoken = models.CharField(default='', max_length=1024, null=True)
     qrcode_image = models.CharField(max_length=255, default='')
     staytime = models.IntegerField(default=0)
     add_favirate = models.IntegerField(default=0)
@@ -561,7 +562,7 @@ class Tasks(models.Model):
     add_follow = models.IntegerField(default=0)
     share_taotoken = models.IntegerField(default=0)
     share_qrcode = models.IntegerField(default=0)
-    task_attention = models.TextField(default='',null=True)
+    task_attention = models.TextField(default='', null=True)
     model_taoqi_min = models.SmallIntegerField(default=0)
     model_taoqi_max = models.SmallIntegerField(default=0)
     model_level = models.IntegerField(default=0)
@@ -579,12 +580,12 @@ class Tasks(models.Model):
     photograph_scene = models.CharField(max_length=45, default='')
     photograph_collocation = models.CharField(max_length=45, default='')
     photograph_images = models.CharField(max_length=255, default='')
-    photograph_attention = models.TextField(default='',null=True)
+    photograph_attention = models.TextField(default='', null=True)
     address_id = models.IntegerField()
-    return_attention = models.TextField(default='',null=True)
+    return_attention = models.TextField(default='', null=True)
     task_state = models.IntegerField(default=10)
-    createtime = models.IntegerField(default=0,editable=False)
-    updatetime = models.IntegerField(default=0,editable=False)
+    createtime = models.IntegerField(default=0, editable=False)
+    updatetime = models.IntegerField(default=0, editable=False)
     taoqi_filter = models.IntegerField(default=0)
     age_filter = models.IntegerField(default=0)
     height_filter = models.IntegerField(default=0)
@@ -592,26 +593,26 @@ class Tasks(models.Model):
     shoe_filter = models.IntegerField(default=0)
     is_return = models.SmallIntegerField(default=0)
     owner = models.ForeignKey(User, null=True)
-    more_comment_filter=models.SmallIntegerField(default=0)
-    more_comment_attention=models.TextField(default='')
-    video_comment_filter=models.SmallIntegerField(default=0)
-    video_comment_attention=models.TextField(default='')
+    more_comment_filter = models.SmallIntegerField(default=0)
+    more_comment_attention = models.TextField(default='')
+    video_comment_filter = models.SmallIntegerField(default=0)
+    video_comment_attention = models.TextField(default='')
 
     class Meta:
         managed = False
         db_table = 'ims_fa_tasks'
 
-    def save(self,*args,**kwargs):
-        self.goods_image=self.cut_host(self.goods_image)
-        self.sku_image=self.cut_host(self.sku_image)
-        self.search_image=self.cut_host(self.search_image)
-        self.qrcode_image=self.cut_host(self.qrcode_image)
-        self.photograph_images=self.cut_host(self.photograph_images)
-        self.condition_image=self.cut_host(self.condition_image)
-        self.updatetime=datetime.datetime.timestamp(datetime.datetime.now())
-        super(Tasks,self).save(*args,**kwargs)
+    def save(self, *args, **kwargs):
+        self.goods_image = self.cut_host(self.goods_image)
+        self.sku_image = self.cut_host(self.sku_image)
+        self.search_image = self.cut_host(self.search_image)
+        self.qrcode_image = self.cut_host(self.qrcode_image)
+        self.photograph_images = self.cut_host(self.photograph_images)
+        self.condition_image = self.cut_host(self.condition_image)
+        self.updatetime = datetime.datetime.timestamp(datetime.datetime.now())
+        super(Tasks, self).save(*args, **kwargs)
 
-    def cut_host(self,charfield):
+    def cut_host(self, charfield):
         if charfield.startswith('http'):
             charfield = urlsplit(charfield).path
 
@@ -620,8 +621,8 @@ class Tasks(models.Model):
 
 class ImageUp(models.Model):
     image = models.ImageField(upload_to='baoma/%Y%m%d', max_length=255)
-    merchant=models.ForeignKey('Merchants',on_delete=models.DO_NOTHING,editable=False,null=True)
-    createtime=models.IntegerField(editable=False)
+    merchant = models.ForeignKey('Merchants', on_delete=models.DO_NOTHING, editable=False, null=True)
+    createtime = models.IntegerField(editable=False)
 
     class Meta:
         managed = False
@@ -629,7 +630,8 @@ class ImageUp(models.Model):
 
 class ConsumeRecords(models.Model):
     consume_id = models.AutoField(primary_key=True)
-    merchant_id = models.ForeignKey('Merchants',related_name='consumerecords',db_column='merchant_id',on_delete=models.DO_NOTHING)
+    merchant_id = models.ForeignKey('Merchants', related_name='consumerecords', db_column='merchant_id',
+                                    on_delete=models.DO_NOTHING)
     merchant_name = models.CharField(max_length=55)
     pay_type = models.IntegerField()
     income = models.DecimalField(max_digits=10, decimal_places=2)
@@ -648,17 +650,17 @@ class ConsumeRecords(models.Model):
 class MerchantRecharge(models.Model):
     recharge_id = models.AutoField(primary_key=True)
     merchant = models.ForeignKey('Merchants')
-    realname=models.CharField(max_length=45,default='')
-    mobile = models.CharField(max_length=45,default='')
-    pay_type=models.SmallIntegerField(default=0)
-    order_num=models.CharField(max_length=45,default='')
-    amount = models.DecimalField(max_digits=8,decimal_places=2,default=0.00)
-    voucher_image=models.CharField(max_length=255,default='')
+    realname = models.CharField(max_length=45, default='')
+    mobile = models.CharField(max_length=45, default='')
+    pay_type = models.SmallIntegerField(default=0)
+    order_num = models.CharField(max_length=45, default='')
+    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    voucher_image = models.CharField(max_length=255, default='')
     state = models.SmallIntegerField(default=0)
-    remark = models.CharField(max_length=45,default='')
-    operator_id=models.IntegerField(default=0)
-    createtime=models.IntegerField(editable=False)
-    operator_name =models.CharField(max_length=55,default='')
+    remark = models.CharField(max_length=45, default='')
+    operator_id = models.IntegerField(default=0)
+    createtime = models.IntegerField(editable=False)
+    operator_name = models.CharField(max_length=55, default='')
 
     class Meta:
         managed = False
@@ -668,18 +670,21 @@ class MerchantRecharge(models.Model):
 class Salesman(models.Model):
     salesman_id = models.AutoField(primary_key=True)
     mobile = models.CharField(max_length=11)
-    password = models.CharField(max_length=40,default='')
-    salt = models.CharField(max_length=8,default='')
-    wechat = models.CharField(max_length=30,default='')
-    qq = models.CharField(max_length=15,default='')
-    realname = models.CharField(max_length=10,default='')
+    password = models.CharField(max_length=40, default='')
+    salt = models.CharField(max_length=8, default='')
+    wechat = models.CharField(max_length=30, default='')
+    qq = models.CharField(max_length=15, default='')
+    realname = models.CharField(max_length=10, default='')
     type = models.SmallIntegerField(default=1)
     state = models.SmallIntegerField(default=1)
     createtime = models.IntegerField(editable=False)
 
     class Meta:
-        managed=False
+        managed = False
         db_table = 'ims_fa_salesman'
 
     def __str__(self):
         return self.realname
+
+
+

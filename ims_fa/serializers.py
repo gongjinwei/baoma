@@ -102,7 +102,8 @@ class MerchantsSerializer(serializers.ModelSerializer):
 
     def get_salesman(self,obj):
         if obj.salesman_id is not None:
-            return models.Salesman.objects.values('salesman_id','mobile','wechat','qq','realname','state','type','createtime').get(pk=obj.salesman_id)
+            if models.Salesman.objects.filter(pk=obj.salesman_id).exists():
+                return models.Salesman.objects.values('salesman_id','mobile','wechat','qq','realname','state','type','createtime').get(pk=obj.salesman_id)
 
 
 class PageSerializer(serializers.ModelSerializer):
@@ -189,6 +190,9 @@ class PasswordResetSerializer(serializers.Serializer):
                                          style={'input_type': 'password'})
     new_password = serializers.CharField(required=True, min_length=5, help_text='新密码！如果是超级用户可修改具体的商家密码，否则只能修改登录密码',
                                          style={'input_type': 'password'})
+
+
+
 
 
 
