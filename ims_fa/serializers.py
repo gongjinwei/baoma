@@ -90,7 +90,7 @@ class SalesmanSerializer(serializers.ModelSerializer):
 
 
 class MerchantsSerializer(serializers.ModelSerializer):
-    stores = serializers.StringRelatedField(many=True, read_only=True)
+    stores = StoresSerializer(many=True, read_only=True)
     salesman = serializers.SerializerMethodField()
     user = serializers.ReadOnlyField(source='user.id')
     level = MerchantLevelSerializer(read_only=True)
