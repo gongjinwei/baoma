@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 from django.shortcuts import render
+from celery.result import AsyncResult
 
 # Create your views here.
 import datetime
@@ -369,3 +370,32 @@ class SalesmanViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         createtime = datetime.datetime.timestamp(datetime.datetime.now())
         serializer.save(createtime=createtime)
+
+
+class TaskTestView(CreateOnlyViewSet):
+    serializer_class = serializers.TaskTestSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            a = serializer.validated_data['a']
+            b = serializer.validated_data['b']
+            from .tasks import add
+            task =add.apply_async((a,b),countdown=30)
+            return Response(task.task_id)
+
+
+class TaskResultView(CreateOnlyViewSet):
+    serializer_class = serializers.TaskResultSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            task_id = serializer.validated_data['task_id']
+            task = AsyncResult(task_id)
+            if task.ready():
+                return Response('你的任务结果是%s' % task.result)
+            else:
+                return Response('你的任务状态是%s' % task.status)

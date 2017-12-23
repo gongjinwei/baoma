@@ -192,6 +192,12 @@ class PasswordResetSerializer(serializers.Serializer):
                                          style={'input_type': 'password'})
 
 
+class TaskTestSerializer(serializers.Serializer):
+    a = serializers.IntegerField()
+    b =serializers.IntegerField()
+
+class TaskResultSerializer(serializers.Serializer):
+    task_id = serializers.CharField(max_length=50)
 
 
 

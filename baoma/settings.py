@@ -197,6 +197,8 @@ CELERY_ACCEPT_CONTENT=['json']
 CELERY_RESULT_BACKEND='redis://localhost'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Shanghai'
+CELERYD_MAX_TASKS_PER_CHILD=100
 
 import djcelery
 djcelery.setup_loader()
