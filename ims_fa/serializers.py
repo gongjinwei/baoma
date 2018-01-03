@@ -192,9 +192,11 @@ class PasswordResetSerializer(serializers.Serializer):
                                          style={'input_type': 'password'})
 
 
-class TaskTestSerializer(serializers.Serializer):
-    a = serializers.IntegerField()
-    b =serializers.IntegerField()
+class OrderRemindSerializer(serializers.Serializer):
+    order_id = serializers.IntegerField(required=True,help_text='订单号')
+    phone_number = serializers.CharField(required=True, validators=[mobile_validator], help_text='11位手机号，符号手机号规则')
+    name = serializers.CharField(default='')
+
 
 class TaskResultSerializer(serializers.Serializer):
     task_id = serializers.CharField(max_length=50)

@@ -45,19 +45,19 @@ class SmsSender(object):
         return strs
 
     def send(self, type='register'):
-        if not isinstance(type,str):
-            return (400,'发送类型错误')
+        if not isinstance(type, str):
+            return (400, '发送类型错误')
         try:
             ttl = cache.ttl(self.receiver + type + '_timeout')
             if ttl > 0:
-                return (400,'请在一分钟后再试')
+                return (400, '请在一分钟后再试')
             deliver_str = self.random_str()
             content_var = {'code': deliver_str}
             response = self.sms_client.send_message_2(self.invoke_id, self.template_id, self.receiver, content_var)
-            cache.set(self.receiver + type +'_timeout', 60, 60)
-            cache.set(deliver_str + type+'_mobile', self.receiver, 900)
+            cache.set(self.receiver + type + '_timeout', 60, 60)
+            cache.set(deliver_str + type + '_mobile', self.receiver, 900)
 
-            return (int(response.code),'发送成功')
+            return (int(response.code), '发送成功')
 
         except BceHttpClientError as e:
             if isinstance(e.last_error, BceServerError):
@@ -65,4 +65,14 @@ class SmsSender(object):
                                   % (e.last_error.status_code, e.last_error.message))
             else:
                 self.logger.error('send message failed. Unknown exception: %s' % e)
-            return (int(e.last_error.code),'系统繁忙')
+            return (int(e.last_error.code), '系统繁忙')
+
+
+def countdown_send(template_id, phone_number, content_var_dict):
+    sms_client = SmsClient(conf.config)
+    try:
+        response = sms_client.send_message_2(conf.invoke_id, template_id=template_id, phone_number=phone_number,
+                                             content_var_dict=content_var_dict)
+        return response.code
+    except BceHttpClientError as e:
+        return e.last_error.code

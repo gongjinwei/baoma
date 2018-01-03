@@ -372,23 +372,19 @@ class SalesmanViewSet(viewsets.ModelViewSet):
         serializer.save(createtime=createtime)
 
 
-class TaskTestView(CreateOnlyViewSet):
-    serializer_class = serializers.TaskTestSerializer
-    permission_classes = [AllowAny]
+class OrderRemindView(CreateOnlyViewSet):
+    serializer_class = serializers.OrderRemindSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            a = serializer.validated_data['a']
-            b = serializer.validated_data['b']
-            from .tasks import add
-            task =add.apply_async((a,b),countdown=30)
+            from .tasks import countdown_task
+            task=countdown_task.apply_async(kwargs={**serializer.validated_data},countdown=10)
             return Response(task.task_id)
 
 
 class TaskResultView(CreateOnlyViewSet):
     serializer_class = serializers.TaskResultSerializer
-    permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -396,6 +392,6 @@ class TaskResultView(CreateOnlyViewSet):
             task_id = serializer.validated_data['task_id']
             task = AsyncResult(task_id)
             if task.ready():
-                return Response('你的任务结果是%s' % task.result)
+                return Response('你的任务结果是:%s' % task.result)
             else:
-                return Response('你的任务状态是%s' % task.status)
+                return Response('你的任务状态是:%s' % task.status)

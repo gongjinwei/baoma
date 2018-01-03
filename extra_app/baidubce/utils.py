@@ -408,7 +408,7 @@ def required(**types):
                                         (f.__code__.co_varnames[i],
                                          v,
                                          types[f.func_code.co_varnames[i]]))
-            for k, v in iter(kwds):
+            for k, v in kwds.items():
                 if k in types:
                     if v is None:
                         raise ValueError('arg "%s" should not be None' % k)
